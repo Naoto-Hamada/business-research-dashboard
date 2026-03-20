@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <!-- プレミアムなフォントとモダンな装飾 -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.6);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --gradient-text: linear-gradient(135deg, #60a5fa 0%, #c084fc 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.15), transparent 25%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin: 0 0 1.2rem 0;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--glass-border), transparent);
+            margin-left: 10px;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.25rem;
+            padding: 1.75rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 20px var(--accent-glow);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+
+        .col-4 {
+            grid-column: span 12;
+        }
+
+        .col-8 {
+            grid-column: span 12;
+        }
+
+        .col-12 {
+            grid-column: span 12;
+        }
+
+        @media(min-width: 768px) {
+            .col-4 {
+                grid-column: span 6;
+            }
+
+            .col-8 {
+                grid-column: span 6;
+            }
+        }
+
+        @media(min-width: 1024px) {
+            .col-4 {
+                grid-column: span 4;
+            }
+
+            .col-8 {
+                grid-column: span 8;
+            }
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fcd34d;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .data-block {
+            margin-bottom: 1.25rem;
+        }
+
+        .data-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        .value {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .value.highlight {
+            font-size: 1.25rem;
+            color: #bae6fd;
+            font-weight: 500;
+        }
+
+        .value.alert {
+            color: #fca5a5;
+        }
+
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+
+        /* Nav controls for multiple records */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        select {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-family: inherit;
+            outline: none;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        select:focus {
+            border-color: var(--accent);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stagger {
+            animation: fadeInDown 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        }
+
+        .stagger:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stagger:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stagger:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stagger:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .stagger:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Business Tracker</h1>
+            <p style="color: var(--text-muted); font-size: 1.15rem; font-weight: 500;">AI-Driven Competitor & Strategy
+                Insights</p>
+        </header>
+
+        <div class="controls" id="controls" style="display: none;">
+            <select id="record-selector" onchange="changeRecord(this.value)">
+                <option value="">Loading...</option>
+            </select>
+        </div>
+
+        <div id="content">
+            <div class="loader">
+                <div class="spinner"></div>
+                <div style="color: var(--text-muted); font-weight: 500; letter-spacing: 0.05em;">SYNCHRONIZING
+                    SECRETS...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+
+        const mockData = [{
+            "調査対象名": "Notion (Demo)",
+            "カテゴリ": "ワークスペース・Wiki",
+            "調査目的": "機能競争力と導入障壁の分析",
+            "主な顧客層": "スタートアップ、IT企業、個人クリエイター",
+            "主訴求": "All-in-one workspace. One tool for your whole team.",
+            "勝ち方の要約": "柔軟なブロックデータベース設計により、タスク管理・Wiki・ドキュメントなどあらゆる用途を1つのツールに集約させているプラットフォーム戦略",
+            "弱みの要約": "多機能ゆえの学習コストの高さ。導入初期の「何から始めればいいか分からない」という迷いが生じやすい",
+            "狙えそうな余白": "特定業界向け（例: 建設業、医療機関）の、最初から用途が限定・完成された特化型UIを持つツールの提供",
+            "次に深掘るべきこと": "非IT企業への導入障壁の実態をヒアリングする"
+        }];
+
+        function renderDashboard(data) {
+            if (!data) return;
+
+            const html = `
+                <div class="dashboard-grid">
+                    <!-- トップサマリ (Span 12) -->
+                    <div class="glass-card col-12 stagger">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                                    <h2 style="font-size: 2rem; margin: 0; border: none; font-family: 'Outfit';">${data['調査対象名'] || 'Unknown'}</h2>
+                                    <span class="badge">${data['カテゴリ'] || 'Category'}</span>
+                                </div>
+                                <div class="value highlight" style="margin-top: 0.5rem;">${data['調査目的'] || '調査目的未設定'}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="label" style="text-align: right;">TARGET OUTCOME</div>
+                                <span class="badge badge-success" style="font-size: 1rem;">勝ち筋発見</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 価値と顧客 (Span 4) -->
+                    <div class="glass-card col-4 stagger">
+                        <h2>🎯 顧客ターゲット</h2>
+                        <div class="data-block">
+                            <div class="label">Primary Segment</div>
+                            <div class="value">${data['主な顧客層'] || '-'}</div>
+                        </div>
+                        <div class="data-block">
+                            <div class="label">Main Appeal</div>
+                            <div class="value" style="font-style: italic;">"${data['主訴求'] || '-'}"</div>
+                        </div>
+                    </div>
+
+                    <!-- なぜ勝っているか (Span 8) -->
+                    <div class="glass-card col-8 stagger">
+                        <h2 style="color: #60a5fa;">🏆 なぜ選ばれているか</h2>
+                        <div class="data-block">
+                            <div class="label">Winning Strategy</div>
+                            <div class="value">${data['勝ち方の要約'] || '-'}</div>
+                        </div>
+                    </div>
+
+                    <!-- 弱み・不満 (Span 4) -->
+                    <div class="glass-card col-4 stagger" style="border-top: 3px solid rgba(248, 113, 113, 0.4);">
+                        <h2 style="color: #fca5a5;">⚠️ 隙・不満</h2>
+                        <div class="data-block">
+                            <div class="label">Weaknesses & Complaints</div>
+                            <div class="value alert">${data['弱みの要約'] || '-'}</div>
+                        </div>
+                    </div>
+
+                    <!-- 余白・勝ち筋 (Span 8) -->
+                    <div class="glass-card col-8 stagger" style="background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(96, 165, 250, 0.3);">
+                        <h2 style="color: #93c5fd;">💡 自分の勝ち筋（仮説）</h2>
+                        <div class="data-block">
+                            <div class="label">Opportunity Space</div>
+                            <div class="value highlight" style="margin-bottom: 1.5rem;">${data['狙えそうな余白'] || '分析データが不足しています'}</div>
+                        </div>
+                        <div class="data-block">
+                            <div class="label">Next Action</div>
+                            <div class="value">${data['次に深掘るべきこと'] || '-'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('content').innerHTML = html;
+        }
+
+        function changeRecord(index) {
+            if (allData[index]) {
+                renderDashboard(allData[index]);
+            }
+        }
+
+        function populateSelector() {
+            if (allData.length > 1) {
+                const sel = document.getElementById('record-selector');
+                sel.innerHTML = '';
+                allData.forEach((record, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.text = record['調査対象名'] || `Research #${i + 1}`;
+                    sel.appendChild(opt);
+                });
+                document.getElementById('controls').style.display = 'flex';
+            }
+        }
+
+        // Try to load from GAS
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+            google.script.run.withSuccessHandler(function (response) {
+                if (response && response.length > 0) {
+                    allData = response;
+                    populateSelector();
+                    renderDashboard(allData[0]); // 最新の1件
+                } else {
+                    document.getElementById('content').innerHTML = '<div class="glass-card" style="text-align: center; max-width: 600px; margin: 0 auto;"><h3>No Data Found</h3><p style="color: var(--text-muted)">「調査管理」シートにデータがありません。Claudeから調査データを送信してください。</p></div>';
+                }
+            }).getDashboardData();
+        } else {
+            // Fallback for local preview
+            setTimeout(() => {
+                allData = mockData;
+                renderDashboard(allData[0]);
+            }, 1200);
+        }
+    </script>
+</body>
+
+</html>
