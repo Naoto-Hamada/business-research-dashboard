@@ -1,173 +1,147 @@
-# AGI Lab Skills Marketplace
+# Business Research — 事業調査エージェント
 
-AGIラボの plugin 集兼、AIエージェントハッカソン参加者向けの starter repo です。
+「この事業調査しておいて」と言うだけで、AIが競合・顧客・強み・弱み・勝ち筋を**6観点で並列調査**し、GoogleスプレッドシートとWebダッシュボードに蓄積するエージェント型 skill です。
 
-この repo では 2 つの使い方があります。
+---
 
-1. AGIラボの既存 plugin をインストールして試す
-2. `plugins/hackathon-starter/` を土台にして、自分の作品をそのまま提出できる形に育てる
+## このskillが答える問い
 
-この README は、特に 2 の「ハッカソン参加者が迷わず提出まで進めること」を優先して書いています。
+この事業は…
+- **誰に** 選ばれているのか
+- **なぜ** 選ばれているのか
+- **どんな仕組みで** その価値を実現しているのか
+- **どこに** 不満や隙があるのか
+- **自分はどこで** 勝てそうか
 
-## ハッカソン参加者はここから
+---
 
-やることはシンプルです。
+## デモ動画
 
-1. この repo を fork する
-2. `plugins/hackathon-starter/` を自分の作品に合わせて書き換える
-3. README を「何ができる plugin か」がすぐ伝わる形に直す
-4. GitHub で公開して、デモ動画と一緒に提出する
+<!-- TODO: デモ動画 URL をここに貼る -->
 
-難しい仕組みを増やす必要はありません。
-まずは `1つの仕事を終わらせる skill` を、他の人が試せる形で置ければ十分です。
+---
 
-## 提出までの一本道
-
-### 1. 何を作るかを 1 行で決める
-
-最初に決めるのは「誰の、どんな面倒を減らす skill なのか」です。
-
-例:
-
-- 営業後の議事メモから、次回提案メールの下書きを自動で作る
-- Discord の未回答質問を集めて、優先度付きで整理する
-- 毎朝のタスクと予定を見て、その日の実行順を提案する
-
-### 2. starter の中身を自分の作品に置き換える
-
-最低限、以下を直せば提出の土台になります。
-
-- `plugins/hackathon-starter/skills/starter-guide/SKILL.md`
-  - 自分の skill の説明、トリガー、入出力、ルールに書き換える
-- `plugins/hackathon-starter/.claude-plugin/plugin.json`
-  - plugin 名と説明文を自分の作品に合わせる
-- `.claude-plugin/marketplace.json`
-  - marketplace の説明と plugin 一覧を自分の提出内容に合わせる
-
-時間がなければ、フォルダ名まできれいに変えなくても構いません。
-まずは `install できる`、`説明が読める`、`動きが分かる` 状態を優先してください。
-
-### 3. README を提出用に整える
-
-README には、少なくとも次の 4 点があると迷いません。
-
-1. この plugin が何をしてくれるか
-2. どうやってインストールするか
-3. どういう入力で呼ぶと、何が返るか
-4. デモ動画やスクリーンショットへの導線
-
-審査する側は、README を読んですぐ試せるかをかなり見ます。
-
-### 4. 公開 GitHub repo とデモ動画を用意する
-
-提出時に最低限あるとよいものは次のとおりです。
-
-- 公開 GitHub repo
-- plugin 1 つ
-- 分かりやすい `SKILL.md` 1 つ
-- README
-- 3 分以内のデモ動画
-
-これで十分に提出できます。
-
-## まず触るファイル
-
-### `.claude-plugin/marketplace.json`
-
-repo 全体の marketplace 情報です。
-審査側が install するときの marketplace 名や、plugin 一覧がここに入ります。
-
-### `plugins/hackathon-starter/.claude-plugin/plugin.json`
-
-plugin 単位の名前と説明です。
-README を読む前に、この説明が一覧で見られることがあります。
-
-### `plugins/hackathon-starter/skills/starter-guide/SKILL.md`
-
-この repo の核です。
-最初は starter ですが、提出時にはここを自分の skill に置き換える前提です。
-
-### `README.md`
-
-審査側と他の参加者が最初に読む入口です。
-長くしすぎるより、「何ができるか」「どう試すか」がすぐ分かる方が強いです。
-
-## 審査する側が最初に見ること
-
-多くの場合、最初に確認されるのは次の流れです。
+## インストール
 
 ```bash
-/plugin marketplace add <your-github-user>/<your-repo>
-/plugin install <your-plugin-name>@<your-marketplace-name>
-```
-
-ここで install できて、README を読めば使い方が分かる状態だと、作品の良さが伝わりやすくなります。
-
-## 最低限これなら提出できる
-
-次の条件を満たしていれば、十分提出ラインです。
-
-- public な GitHub repo がある
-- plugin が 1 つ入っている
-- `SKILL.md` が自分の作品内容に置き換わっている
-- README にセットアップと使い方が書いてある
-- デモ動画がある
-
-大きなフレームワークや複雑な構成は必須ではありません。
-まずは 1 つの体験を、最後まで試せる形で完成させるのが最優先です。
-
-## 既存 plugin を試したい人へ
-
-この repo は marketplace としても使えます。
-
-```bash
-# In Claude Code
+# Claude Code で実行
 /plugin marketplace add kaishushito/agi-lab-skills-marketplace
-/plugin install terminal-vibes@agi-lab-skills
+/plugin install business-research@agi-lab-skills
 ```
 
-## 収録 plugin
+---
 
-### hackathon-starter
+## 使い方
 
-ハッカソン参加者向けの最小 starter です。
-「まず 1 つ skill を形にして提出する」ための土台として使えます。
+```
+NotionについてURLはhttps://notion.so、目的は「差別化ポイントを知りたい」で事業調査して
+```
 
-### terminal-vibes
+それだけで Claude が以下を自動で行います：
 
-ターミナルで少し息抜きしたいときの遊び plugin です。
-ASCII ドーナツ、cat art、dad joke、Matrix rain などを試せます。
+1. 公式サイト・LP・導入事例・レビュー・比較記事などを並列に調査
+2. 6観点（競合・顧客・価値・仕組み・不満・勝ち筋）で整理
+3. 構造化 JSON をスプレッドシートの Webhook に POST
+4. ターミナルに最終サマリー（勝ち方・弱み・狙い目）を出力
 
-| Command | 内容 |
-|---------|------|
-| `/vibes` | ランダムで何か 1 つ表示 |
-| `/vibes donut` | 3D ASCII ドーナツ |
-| `/vibes cat` | ランダム ASCII cat art |
-| `/vibes joke` | プログラマー向け dad joke |
-| `/vibes matrix` | Matrix 風の文字列演出 |
-| `/vibes full show` | 全演目を順番に実行 |
+---
 
-必要環境: Python 3, Bash, ANSI 対応のターミナル
+## ダッシュボードのセットアップ
+
+### 1. スプレッドシートを作成する
+
+1. [Google スプレッドシート](https://sheets.new) で新規シートを作成
+2. 「拡張機能」>「Apps Script」を開く
+
+### 2. GAS コードを貼り付ける
+
+1. `コード.gs` に [`scripts/setup_dashboard.gs`](plugins/business-research/scripts/setup_dashboard.gs) の内容を貼り付ける
+2. 「ファイル」>「新しいファイル」>「HTML」で **`dashboard`** という名前のファイルを作成
+3. [`scripts/dashboard.html`](plugins/business-research/scripts/dashboard.html) の内容を貼り付ける
+4. 保存する
+
+### 3. 初期セットアップを実行する
+
+スプレッドシートに戻ると **「ビジネスリサーチ」** メニューが表示されます。
+
+「📥 初期セットアップ（シート作成）」を実行すると、以下の4シートが自動作成されます：
+
+| シート名 | 役割 |
+|---|---|
+| 調査管理 | 1行＝1回の調査（親レコード） |
+| 企業分析 | 1行＝1企業の分析結果（競合含む） |
+| ソース一覧 | 1行＝1参考URL（根拠追跡用） |
+| ダッシュボード表示用 | ダッシュボード向け整形済みビュー |
+
+### 4. Webhook URL を発行する
+
+1. 「デプロイ」>「新しいデプロイ」>「ウェブアプリ」
+2. 実行するユーザー：**自分**
+3. アクセスできるユーザー：**全員**（または組織内）
+4. デプロイして URL をコピーする
+
+### 5. 環境変数に Webhook URL を設定する
+
+```bash
+claude config set env.BUSINESS_RESEARCH_WEBHOOK "https://script.google.com/macros/s/XXXX/exec"
+```
+
+これで調査結果が自動的にスプレッドシートに保存されます。
+
+### 6. ダッシュボードを開く
+
+デプロイ URL にブラウザでアクセスするとダッシュボードが表示されます。
+
+---
+
+## ダッシュボードのセクション構成
+
+| セクション | 内容 |
+|---|---|
+| ① 事業サマリー | サービス名・カテゴリ・調査目的・勝ち方の要約 |
+| ② 競合整理 | 直接競合・間接競合・代替手段・比較されやすい相手 |
+| ③ 顧客と刺さる理由 | 顧客層・主訴求・悩み仮説・インサイト |
+| ④ 勝ち方の構造 | 独自の仕組み・体制仮説・再現しにくい強み |
+| ⑤ 不満と余白 | 頻出不満・不満の背景・対象層 |
+| ⑥ 自分の勝ち筋 | 狙える切り口・避けるべき土俵・次の一手 |
+| ⑦ ソース一覧 | 参考URL・根拠区分（事実/推定/仮説）・抜粋メモ |
+
+---
+
+## 調査品質の方針
+
+- **事実と推定（仮説）を区別**して出力する
+- **根拠 URL を必ず記録**する
+- **不明なものは不明**と記載し、無理に断定しない
+- ただの要約ではなく、**意思決定に使える示唆**を出す
+
+---
 
 ## Repository Structure
 
-```text
+```
 .claude-plugin/
 └── marketplace.json
 
 plugins/
-├── hackathon-starter/
+├── business-research/
 │   ├── .claude-plugin/
 │   │   └── plugin.json
-│   └── skills/
-│       └── starter-guide/
-│           └── SKILL.md
-└── terminal-vibes/
+│   ├── skills/
+│   │   └── business-research/
+│   │       └── SKILL.md
+│   └── scripts/
+│       ├── setup_dashboard.gs   ← Google Apps Script
+│       └── dashboard.html       ← ダッシュボード UI
+└── hackathon-starter/
     ├── .claude-plugin/
     │   └── plugin.json
-    ├── scripts/
     └── skills/
+        └── starter-guide/
+            └── SKILL.md
 ```
+
+---
 
 ## License
 

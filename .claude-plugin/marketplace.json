@@ -5,10 +5,18 @@
     "email": "kai@tempi.co.jp"
   },
   "metadata": {
-    "description": "AGIラボの plugin 集と、ハッカソン参加者向け starter template。",
-    "version": "1.1.0"
+    "description": "AGIラボの plugin 集。business-research は企業調査をAIで自動化し、スプレッドシートとダッシュボードに結果を蓄積するエージェント型 skill です。",
+    "version": "2.0.0"
   },
   "plugins": [
+    {
+      "name": "business-research",
+      "source": "./plugins/business-research",
+      "description": "「この事業調査しておいて」と言うだけで、競合・顧客層・強み・弱み・勝ち筋を6観点で並列調査し、Googleスプレッドシートとダッシュボードに蓄積するエージェント。",
+      "version": "1.0.0",
+      "category": "productivity",
+      "tags": ["business", "research", "competitor", "strategy", "spreadsheet", "dashboard", "gas"]
+    },
     {
       "name": "hackathon-starter",
       "source": "./plugins/hackathon-starter",
@@ -16,14 +24,6 @@
       "version": "0.1.0",
       "category": "template",
       "tags": ["starter", "template", "hackathon", "marketplace"]
-    },
-    {
-      "name": "terminal-vibes",
-      "source": "./plugins/terminal-vibes",
-      "description": "Spinning ASCII donuts, cat art, dad jokes, and Matrix rain. Pure terminal fun, no API keys needed.",
-      "version": "1.1.0",
-      "category": "fun",
-      "tags": ["entertainment", "ascii-art", "terminal", "break-time"]
     }
   ]
 }

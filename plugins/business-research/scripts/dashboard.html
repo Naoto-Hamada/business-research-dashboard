@@ -92,6 +92,16 @@
     .bmc-empty { color: var(--t3); font-style: italic; }
     .bmc-hint { font-size: 10px; color: var(--t3); margin-top: 6px; }
 
+    /* ── Financials Section ── */
+    .fin-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media (max-width: 700px) { .fin-grid { grid-template-columns: 1fr; } }
+    .fin-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .fin-card-label { font-size: 10px; font-weight: 700; color: var(--t3); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 8px; }
+    .fin-card-summary { font-size: 13.5px; font-weight: 600; line-height: 1.4; margin-bottom: 10px; }
+    .fin-card-items { list-style: none; padding: 0; margin: 0; font-size: 11.5px; color: var(--t2); }
+    .fin-card-items li { padding: 4px 0; border-top: 1px solid var(--border); line-height: 1.55; }
+    .fin-card-items li:first-child { border-top: none; }
+
     /* ── BMC Detail Panel ── */
     .bmc-detail { background: var(--card); border: 1.5px solid var(--accent); border-radius: 10px; padding: 20px 24px; margin-bottom: 8px; }
     .bmc-detail-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
@@ -170,13 +180,19 @@
     .ct-biz-sub a { color: var(--accent); text-decoration: none; font-size: 11.5px; }
     .ct-target { border-top: 2px solid var(--accent); }
     .ct-empty { color: var(--t3); font-style: italic; }
-    .ct-group-row td { background: #f8fbff; font-size: 11px; font-weight: 700; color: #24408f; letter-spacing: 0.04em; text-transform: uppercase; }
-    .ct-group-row .ct-dim { background: #edf4ff; }
     .ct-row-label { display: inline-flex; align-items: center; gap: 6px; }
+    .compare-table tr.ct-tone-blue td { background: #f7faff; }
+    .compare-table tr.ct-tone-blue .ct-dim { background: #ebf2ff; }
+    .compare-table tr.ct-tone-green td { background: #f6fbf7; }
+    .compare-table tr.ct-tone-green .ct-dim { background: #e9f6ec; }
+    .compare-table tr.ct-tone-neutral td { background: #fafbfc; }
+    .compare-table tr.ct-tone-neutral .ct-dim { background: #eef1f4; }
+    .compare-table tr.ct-tone-caution td { background: #fff9f7; }
+    .compare-table tr.ct-tone-caution .ct-dim { background: #ffefea; }
     .compare-intro { border: 1px solid #d8e1f0; border-radius: 12px; background: #fff; padding: 12px 14px; margin-bottom: 14px; }
-    .compare-intro-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .compare-intro-btn { border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
-    .compare-intro-btn:hover { background: #dbeafe; }
+    .compare-intro-head { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
+    .compare-toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 12.5px; font-weight: 600; color: var(--t2); }
+    .compare-toggle input { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); }
     .compare-intro-body { margin-top: 10px; display: grid; gap: 10px; }
     .anti-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
     .anti-list li { font-size: 12.5px; line-height: 1.6; color: var(--t1); }
@@ -414,6 +430,13 @@ function goBiz(idx, el) {
   render();
 }
 
+function goBizFromCompare(idx) {
+  var list = document.querySelectorAll('.biz-btn');
+  var target = list[idx];
+  if (!target) return;
+  goBiz(idx, target);
+}
+
 function toggleCompareInsight() {
   S.compareInsightOpen = !S.compareInsightOpen;
   render(true);
@@ -459,78 +482,48 @@ function setMainHtml(html) {
 function renderCompareView(businesses, project, cross) {
   if (!businesses.length) return '<div class="center"><div class="c-desc">データがありません</div></div>';
 
-  var axisX = project['ポジション軸X名'] || '';
-  var axisY = project['ポジション軸Y名'] || '';
-  var sections = [];
-  sections.push({
-    title: '利益・売上・コスト',
-    rows: [
-      { label: '利益構造', info: '利益構造', fn: function(b) {
-        var rev = (b.bmc || {}).revenueStreams || b.pricing || '';
+  var rows = [
+    { label: '売上（推定）', info: 'KPI', tone: 'ct-tone-blue', fn: function(b) {
+      var fin = b.financials;
+      var kpi = b.kpi ? '<div style="color:var(--green);font-weight:600">' + esc(trunc(b.kpi, 60)) + '</div>' : '';
+      var revSim = (fin && fin.revenue) ? '<div style="color:var(--green);margin-top:3px">シミュ: ' + esc(trunc(fin.revenue.summary, 50)) + '</div>' : '';
+      if (!kpi && !revSim) return '<span class="ct-empty">—</span>';
+      return kpi + revSim;
+    }},
+    { label: 'コスト・利益（推定）', info: '利益構造', tone: 'ct-tone-blue', fn: function(b) {
+      var fin = b.financials;
+      if (!fin) {
         var cost = (b.bmc || {}).costStructure || '';
-        if (!rev && !cost) return '<span class="ct-empty">—</span>';
-        return '<div><div style="color:var(--green);font-weight:600">収益: ' + esc(trunc(rev || '未記入', 56)) + '</div><div style="color:var(--amber);margin-top:4px">コスト: ' + esc(trunc(cost || '未記入', 56)) + '</div></div>';
-      }},
-      { label: '売上・規模', info: 'KPI', fn: function(b) {
-        return b.kpi ? '<span style="font-size:12px;font-weight:500;color:var(--green)">' + esc(b.kpi) + '</span>' : '<span class="ct-empty">—</span>';
-      }},
-      { label: 'コスト', info: 'コスト構造', fn: function(b) {
-        var cost = (b.bmc || {}).costStructure || '';
-        return cost ? esc(trunc(cost, 120)) : '<span class="ct-empty">—</span>';
-      }}
-    ]
-  });
-  sections.push({
-    title: '市場選定・価値提供・販売促進・ビジネスモデル',
-    rows: [
-      { label: '市場選定', info: '評価軸', fn: function(b) {
-        var customer = findA(b.analyses, '顧客');
-        var text = customer ? customer.conclusion : (b.bmc || {}).customerSegments || '';
-        return text ? esc(trunc(text, 140)) : '<span class="ct-empty">—</span>';
-      }},
-      { label: '価値提供', info: '価値提案', fn: function(b) {
-        var value = findA(b.analyses, '価値');
-        var text = value ? value.conclusion : (b.bmc || {}).valueProposition || '';
-        return text ? esc(trunc(text, 140)) : '<span class="ct-empty">—</span>';
-      }},
-      { label: '販売促進', info: '評価軸', fn: function(b) {
-        var t = [((b.bmc || {}).channels || ''), ((b.bmc || {}).customerRelationships || '')].filter(Boolean).join(' / ');
-        return t ? esc(trunc(t, 130)) : '<span class="ct-empty">—</span>';
-      }},
-      { label: 'ビジネスモデル', info: 'ビジネスモデルキャンバス', fn: function(b) {
-        var v = (b.bmc || {}).valueProposition || '';
-        var r = (b.bmc || {}).revenueStreams || b.pricing || '';
-        var c = (b.bmc || {}).costStructure || '';
-        var text = [v, r, c].filter(Boolean).join(' / ');
-        return text ? esc(trunc(text, 155)) : '<span class="ct-empty">—</span>';
-      }}
-    ]
-  });
-  sections.push({
-    title: '強み・弱み・不満',
-    rows: [
-      { label: '強み', fn: function(b) {
-        var a = findA(b.analyses, '価値'); return a ? '<span style="color:var(--green)">' + esc(trunc(a.conclusion, 130)) + '</span>' : '<span class="ct-empty">—</span>';
-      }},
-      { label: '弱み', fn: function(b) {
-        var a = findA(b.analyses, '仕組み');
-        return a ? '<span style="color:var(--amber)">' + esc(trunc(a.conclusion, 130)) + '</span>' : '<span class="ct-empty">—</span>';
-      }},
-      { label: '不満', fn: function(b) {
-        var a = findA(b.analyses, '不満'); return a ? '<span style="color:var(--red)">' + esc(trunc(a.conclusion, 130)) + '</span>' : '<span class="ct-empty">—</span>';
-      }}
-    ]
-  });
-  if (axisX || axisY) {
-    var axisRows = [];
-    if (axisX) axisRows.push({ label: esc(axisX), fn: function(b) {
-      return (b.positionX !== null && b.positionX !== undefined) ? '<span style="font-weight:700;font-size:14px">' + b.positionX + '</span>' : '<span class="ct-empty">—</span>';
-    }});
-    if (axisY) axisRows.push({ label: esc(axisY), fn: function(b) {
-      return (b.positionY !== null && b.positionY !== undefined) ? '<span style="font-weight:700;font-size:14px">' + b.positionY + '</span>' : '<span class="ct-empty">—</span>';
-    }});
-    sections.push({ title: 'ポジション指標', rows: axisRows });
-  }
+        return cost ? esc(trunc(cost, 70)) : '<span class="ct-empty">—</span>';
+      }
+      var parts = [];
+      if (fin.cost) parts.push('<span style="color:var(--amber)">コスト: ' + esc(trunc(fin.cost.summary, 45)) + '</span>');
+      if (fin.profit) parts.push('<span style="color:var(--accent)">利益: ' + esc(trunc(fin.profit.summary, 45)) + '</span>');
+      return parts.length ? parts.join('<br>') : '<span class="ct-empty">—</span>';
+    }},
+    { label: '顧客層', info: '顧客セグメント', tone: 'ct-tone-green', fn: function(b) {
+      var customer = findA(b.analyses, '顧客');
+      var text = customer ? customer.conclusion : (b.bmc || {}).customerSegments || '';
+      return text ? esc(trunc(text, 80)) : '<span class="ct-empty">—</span>';
+    }},
+    { label: '選ばれる理由', info: '価値提案', tone: 'ct-tone-green', fn: function(b) {
+      var value = findA(b.analyses, '価値');
+      var text = value ? value.conclusion : (b.bmc || {}).valueProposition || '';
+      return text ? esc(trunc(text, 80)) : '<span class="ct-empty">—</span>';
+    }},
+    { label: '収益モデル', info: 'ビジネスモデルキャンバス', tone: 'ct-tone-green', fn: function(b) {
+      var r = (b.bmc || {}).revenueStreams || b.pricing || '';
+      return r ? esc(trunc(r, 80)) : '<span class="ct-empty">—</span>';
+    }},
+    { label: '強み', tone: 'ct-tone-neutral', fn: function(b) {
+      var a = findA(b.analyses, '価値');
+      return a ? '<span style="color:var(--green)">' + esc(trunc(a.conclusion, 80)) + '</span>' : '<span class="ct-empty">—</span>';
+    }},
+    { label: '不満・弱み', tone: 'ct-tone-caution', fn: function(b) {
+      var diss = findA(b.analyses, '不満');
+      return diss ? '<span style="color:var(--red)">' + esc(trunc(diss.conclusion, 80)) + '</span>' : '<span class="ct-empty">—</span>';
+    }}
+  ];
 
   var html = '<div class="content">';
   html += '<div style="margin-bottom:18px"><span style="font-family:Outfit,sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em">' + esc(project['プロジェクト名'] || '') + ' — 競争環境</span></div>';
@@ -540,37 +533,65 @@ function renderCompareView(businesses, project, cross) {
   // Header row
   html += '<thead><tr>';
   html += '<th class="ct-dim ct-hdr-dim">事業</th>';
-  businesses.forEach(function(b) {
+  businesses.forEach(function(b, i) {
     var isT = b.role === '調査対象';
     var serviceName = esc(b.serviceName || b.businessName || '');
-    var serviceLink = b.url ? '<a href="' + esc(b.url) + '" target="_blank" rel="noopener">' + serviceName + '</a>' : serviceName;
+    var serviceLink = '<a href="#" onclick="goBizFromCompare(' + i + ');return false;">' + serviceName + '</a>';
     var summary = (b.bmc || {}).valueProposition || '';
     html += '<th class="ct-biz ct-hdr-biz' + (isT ? ' ct-target' : '') + '">' +
       '<div class="ct-biz-sub" style="margin-bottom:5px">' + roleBadgeHtml(b.role) + '</div>' +
       '<div class="ct-biz-name">' + (isT ? '🎯 ' : '') + serviceLink + '</div>' +
-      '<div class="ct-biz-sub">' + (summary ? esc(trunc(summary, 86)) : '事業概要なし') + '</div>' +
+      '<div class="ct-biz-sub">' + (summary ? esc(trunc(summary, 70)) : '事業概要なし') + '</div>' +
+      '<div style="margin-top:6px"><a href="#" onclick="goBizFromCompare(' + i + ');return false;" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none">詳細を見る →</a></div>' +
     '</th>';
   });
   html += '</tr></thead>';
 
   // Dimension rows
   html += '<tbody>';
-  sections.forEach(function(sec) {
-    html += '<tr class="ct-group-row"><td class="ct-dim">' + esc(sec.title) + '</td>';
-    businesses.forEach(function() { html += '<td class="ct-biz"></td>'; });
-    html += '</tr>';
-    sec.rows.forEach(function(row) {
-      var label = '<span class="ct-row-label">' + row.label + (row.info ? infoIcon(row.info) : '') + '</span>';
-      html += '<tr><td class="ct-dim">' + label + '</td>';
-      businesses.forEach(function(b) {
-        html += '<td class="ct-biz">' + row.fn(b) + '</td>';
-      });
-      html += '</tr>';
+  rows.forEach(function(row) {
+    var label = '<span class="ct-row-label">' + row.label + (row.info ? infoIcon(row.info) : '') + '</span>';
+    html += '<tr class="' + (row.tone || '') + '"><td class="ct-dim">' + label + '</td>';
+    businesses.forEach(function(b) {
+      html += '<td class="ct-biz">' + row.fn(b) + '</td>';
     });
+    html += '</tr>';
   });
   html += '</tbody></table></div>';
 
   html += '</div>';
+  return html;
+}
+
+// ─── Financials Section ───────────────────────────────
+function renderFinancialsSection(biz) {
+  var fin = biz.financials;
+  if (!fin) return '';
+  var ev = fin.evidenceLevel || '推定';
+  var evClass = ev === '事実' ? 'b-green' : ev === '推定' ? 'b-amber' : 'b-gray';
+
+  function finCard(data, label, colorStyle) {
+    if (!data) return '';
+    var items = (data.items || []).map(function(item) {
+      return '<li>' + esc(item) + '</li>';
+    }).join('');
+    return '<div class="fin-card">' +
+      '<div class="fin-card-label">' + esc(label) + '</div>' +
+      '<div class="fin-card-summary" style="' + colorStyle + '">' + esc(data.summary || '—') + '</div>' +
+      (items ? '<ul class="fin-card-items">' + items + '</ul>' : '') +
+    '</div>';
+  }
+
+  var html = '<div class="flow-sec">';
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">';
+  html += '<div style="font-size:12px;font-weight:700;color:var(--t2);letter-spacing:0.04em;text-transform:uppercase">財務シミュレーション</div>';
+  html += '<span class="badge ' + evClass + '">' + esc(ev) + '</span>';
+  html += '</div>';
+  html += '<div class="fin-grid">';
+  html += finCard(fin.revenue, '売上', 'color:var(--green)');
+  html += finCard(fin.cost,    'コスト', 'color:var(--amber)');
+  html += finCard(fin.profit,  '利益', 'color:var(--accent)');
+  html += '</div></div>';
   return html;
 }
 
@@ -579,6 +600,7 @@ function renderIndividualView(biz, project, cross) {
   var html = renderSummaryBoard(biz, project);
   html += '<div class="content">';
   html += renderBmcVisualSection(biz);
+  html += renderFinancialsSection(biz);
   html += '</div>';
   return html;
 }
@@ -587,6 +609,8 @@ function renderSummaryBoard(biz, project) {
   var bmcVP   = (biz.bmc || {}).valueProposition || '';
   var co = biz.company || {};
   var coText = co.name ? co.name + (co.scale ? ' · ' + co.scale : '') : '';
+  var recentSummary = getRecentSummaryText(biz);
+  var externalSummary = getExternalSummaryText(biz);
 
   var html = '<div class="sum-board">';
   html += '<div class="sum-hdr"><div style="flex:1">';
@@ -601,13 +625,35 @@ function renderSummaryBoard(biz, project) {
   html += '</div></div></div>';
   html += '<div class="sum-bullets">';
   html += sumBullet('概要', bmcVP || '');
+  html += sumBullet('直近の動き', recentSummary || 'データなし', actionInfoIcon('openFutureModal()'));
+  html += sumBullet('外部評価', externalSummary || 'データなし', actionInfoIcon('openExternalSummaryModal()'));
   html += '</div></div>';
   return html;
 }
 
-function sumBullet(label, text) {
+function sumBullet(label, text, actionIconHtml) {
   if (!text) return '';
-  return '<div class="sum-bullet"><span class="sum-bullet-label">' + esc(label) + '</span><span class="sum-bullet-text">' + esc(trunc(text, 120)) + '</span></div>';
+  return '<div class="sum-bullet"><span class="sum-bullet-label">' + esc(label) + (actionIconHtml ? ' ' + actionIconHtml : '') + '</span><span class="sum-bullet-text">' + esc(trunc(text, 128)) + '</span></div>';
+}
+
+function actionInfoIcon(onclickCode) {
+  return '<span class="info-ic" onclick="event.stopPropagation();' + onclickCode + '">i</span>';
+}
+
+function getRecentSummaryText(biz) {
+  var recentA = findA(biz.analyses || [], '直近の動き');
+  if (recentA && recentA.conclusion) return recentA.conclusion;
+  var latestNews = (biz.news || [])[0];
+  if (!latestNews) return '';
+  var title = latestNews['タイトル'] || latestNews.title || '';
+  var summary = latestNews['要点'] || latestNews.summary || '';
+  return [title, summary].filter(Boolean).join(' / ');
+}
+
+function getExternalSummaryText(biz) {
+  var quotes = (biz.quotes || []).filter(function(q) { return (q['観点'] || q.perspective) === 'アナリスト'; });
+  if (!quotes.length) return '';
+  return quotes[0]['引用テキスト'] || quotes[0].text || '';
 }
 
 function renderStrategicGuardrailSection(businesses, cross) {
@@ -615,8 +661,9 @@ function renderStrategicGuardrailSection(businesses, cross) {
   var anti = getAntiTeacherPointsFromBusinesses(businesses);
   var crossA = (cross || []).find(function(c) { return c.perspective === '示唆'; });
   var html = '<div class="compare-intro">';
-  html += '<div class="compare-intro-head"><div style="font-size:12px;font-weight:600;color:var(--t2)">必要なときだけ展開して参照</div>';
-  html += '<button class="compare-intro-btn" onclick="toggleCompareInsight()">参入にあたり解釈 ' + (S.compareInsightOpen ? '▲' : '▼') + '</button></div>';
+  html += '<div class="compare-intro-head">';
+  html += '<label class="compare-toggle"><input type="checkbox" ' + (S.compareInsightOpen ? 'checked' : '') + ' onchange="toggleCompareInsight()"><span>参入にあたっての解釈</span></label>';
+  html += '</div>';
   if (S.compareInsightOpen) {
     html += '<div class="compare-intro-body">';
     if (crossA) {
@@ -957,7 +1004,10 @@ function openBmcModal(key) {
     vp:  { title: '提供価値', body: b.valueProposition || '' },
     ka:  { title: '価値実装（主要活動 / 主要リソース）', body: ((b.keyActivities || '') + '\n' + (b.keyResources || '')).trim() },
     ch:  { title: '販促チャネル', body: ((b.channels || '') + '\n' + (b.customerRelationships || '')).trim() },
-    kpi: { title: '主要KPI', body: biz.kpi || '' }
+    kpi: { title: '主要KPI', body: biz.kpi || '' },
+    kp:  { title: '主要パートナー', body: b.keyPartners || '' },
+    kr:  { title: '主要リソース', body: b.keyResources || '' },
+    cr:  { title: '顧客との関係', body: b.customerRelationships || '' }
   };
   var item = map[key];
   if (!item) return;
@@ -1047,6 +1097,27 @@ function openFutureModal() {
     html += '</div>';
   }
   openDetailModal({ title: '今後の方針', subtitle: biz.serviceName || biz.businessName || '', bodyHtml: html });
+}
+
+function openExternalSummaryModal() {
+  var biz = getCurrentBiz();
+  if (!biz) return;
+  var analystQuotes = (biz.quotes || []).filter(function(q) { return (q['観点'] || q.perspective) === 'アナリスト'; });
+  var html = '';
+  if (!analystQuotes.length) {
+    html = '<div class="card"><div class="card-val" style="color:var(--t3)">外部評価は未登録です。</div></div>';
+  } else {
+    html += '<div class="card"><div class="card-label">外部評価サマリー</div><div class="card-val">' + esc(getExternalSummaryText(biz)) + '</div></div>';
+    html += '<div style="height:10px"></div><div class="card"><div class="card-label">外部評価の詳細</div>';
+    analystQuotes.slice(0, 10).forEach(function(q) {
+      var src = q['顧客属性'] || q.customerProfile || '';
+      var sentiment = q['感情'] || q.sentiment || '';
+      var text = q['引用テキスト'] || q.text || '';
+      html += '<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="font-size:11px;color:var(--t3)">' + esc([src, sentiment].filter(Boolean).join(' · ')) + '</div><div style="font-size:12px;color:var(--t1)">"' + esc(text) + '"</div></div>';
+    });
+    html += '</div>';
+  }
+  openDetailModal({ title: '外部評価', subtitle: biz.serviceName || biz.businessName || '', bodyHtml: html });
 }
 
 function getAbsoluteElements(businesses) {

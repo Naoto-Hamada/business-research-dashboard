@@ -1,0 +1,11 @@
+{
+  "name": "business-research",
+  "description": "企業やサービスについて公開情報から深掘り調査し、競合・顧客層・強み・弱み・勝ち筋を整理。結果をGoogleスプレッドシートに保存し、ダッシュボードで可視化します。",
+  "version": "1.0.0",
+  "author": {
+    "name": "AGI Lab"
+  },
+  "homepage": "https://github.com/KaishuShito/agi-lab-skills-marketplace",
+  "license": "MIT",
+  "keywords": ["business", "research", "competitor", "strategy", "spreadsheet", "dashboard"]
+}

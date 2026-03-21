@@ -16,6 +16,7 @@ function onOpen() {
     .createMenu('ビジネスリサーチ')
     .addItem('📥 初期セットアップ（シート作成・スキーマ更新）', 'setupSheets')
     .addItem('🔄 ダッシュボードシートを更新', 'refreshDashboardSheet')
+    .addItem('✅ データ品質チェック', 'validateSheets')
     .addToUi();
 }
 
@@ -37,6 +38,7 @@ function setupSheets() {
   _setupSheet分析(ss);
   _setupSheetニュース(ss);
   _setupSheetダッシュボード(ss);
+  _applyDataValidations(ss);
 
   SpreadsheetApp.getUi().alert(
     'セットアップ完了。\n\n' +
@@ -60,8 +62,7 @@ function _setupSheet事業(ss) {
     '事業ID', 'プロジェクトID', '事業名', 'サービス名', '公式URL', '事業種別', '運営企業ID',
     '価格帯', 'ポジションX値', 'ポジションY値',
     'BMC_価値提案', 'BMC_顧客セグメント', 'BMC_チャネル', 'BMC_顧客との関係',
-    'BMC_収益の流れ', 'BMC_主要リソース', 'BMC_主要活動', 'BMC_主要パートナー', 'BMC_コスト構造',
-    '主要KPI'
+    'BMC_収益の流れ', 'BMC_主要リソース', 'BMC_主要活動', 'BMC_主要パートナー', 'BMC_コスト構造', '主要KPI'
   ], '#dcfce7');
 }
 
@@ -107,10 +108,45 @@ function _setupSheetダッシュボード(ss) {
 }
 
 function _writeHeaders(sheet, headers, bgColor) {
+  const clearTo = Math.max(sheet.getLastColumn(), headers.length);
+  sheet.getRange(1, 1, 1, clearTo).clearContent().clearDataValidations();
   const range = sheet.getRange(1, 1, 1, headers.length);
   range.setValues([headers]);
   range.setFontWeight('bold').setBackground(bgColor);
   sheet.setFrozenRows(1);
+}
+
+function _applyDataValidations(ss) {
+  const rules = [
+    { sheet: '事業', col: '事業種別', list: ['調査対象', '直接競合', '間接競合', '代替サービス', '比較対象'] },
+    { sheet: 'ソース', col: '種別', list: ['公式サイト', 'レビューサイト', 'ニュース', 'ブログ', 'SNS', 'その他'] },
+    { sheet: '引用', col: '感情', list: ['ポジティブ', 'ネガティブ', 'ニュートラル'] },
+    { sheet: '引用', col: '観点', list: ['顧客', '価値', '不満', 'アナリスト'] },
+    { sheet: '分析', col: '観点', list: ['価値', '仕組み', '顧客', '不満', '直近の動き', '示唆'] },
+    { sheet: 'ニュース', col: '種別', list: ['プレスリリース', 'ニュース', 'レビュー', 'ブログ', 'SNS', 'その他'] }
+  ];
+
+  rules.forEach(function(r) {
+    const sheet = ss.getSheetByName(r.sheet);
+    if (!sheet) return;
+    const col = _headerColIndex(sheet, r.col);
+    if (col < 1) return;
+    const startRow = 2;
+    const rowCount = Math.max(sheet.getMaxRows() - 1, 1);
+    const range = sheet.getRange(startRow, col, rowCount, 1);
+    const validation = SpreadsheetApp.newDataValidation()
+      .requireValueInList(r.list, true)
+      .setAllowInvalid(true)
+      .build();
+    range.setDataValidation(validation);
+  });
+}
+
+function _headerColIndex(sheet, headerName) {
+  const width = Math.max(sheet.getLastColumn(), 1);
+  const headers = sheet.getRange(1, 1, 1, width).getValues()[0];
+  const idx = headers.indexOf(headerName);
+  return idx >= 0 ? idx + 1 : -1;
 }
 
 // ========== ダッシュボード表示用シートの更新 ==========
@@ -121,8 +157,126 @@ function refreshDashboardSheet() {
     SpreadsheetApp.getUi().alert('先に初期セットアップを実行してください。');
     return;
   }
+  _applyDataValidations(ss);
   refreshDashboardSheet_();
   SpreadsheetApp.getUi().alert('ダッシュボード表示用シートを更新しました。');
+}
+
+function validateSheets() {
+  const ss = _getSpreadsheet();
+  const issues = _collectSheetIssues(ss);
+  const reportSheet = ss.getSheetByName('データ品質') || ss.insertSheet('データ品質');
+  reportSheet.clearContents();
+  const headers = ['レベル', 'シート', '行番号', '列名', 'エラー種別', '詳細'];
+  reportSheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold').setBackground('#fee2e2');
+
+  if (!issues.length) {
+    reportSheet.getRange(2, 1, 1, headers.length).setValues([['OK', '-', '-', '-', 'データ品質', '問題は見つかりませんでした']]);
+    SpreadsheetApp.getUi().alert('データ品質チェック: 問題は見つかりませんでした。');
+    return;
+  }
+
+  const rows = issues.map(function(i) {
+    return [i.level || 'WARN', i.sheet || '-', i.row || '-', i.column || '-', i.type || '-', i.detail || ''];
+  });
+  reportSheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+  reportSheet.autoResizeColumns(1, headers.length);
+  SpreadsheetApp.getUi().alert('データ品質チェック完了: ' + rows.length + '件の指摘を「データ品質」シートに出力しました。');
+}
+
+function _collectSheetIssues(ss) {
+  const issues = [];
+  const projects = _getSheetAsObjects(ss.getSheetByName('調査プロジェクト'));
+  const businesses = _getSheetAsObjects(ss.getSheetByName('事業'));
+  const companies = _getSheetAsObjects(ss.getSheetByName('運営企業'));
+  const sources = _getSheetAsObjects(ss.getSheetByName('ソース'));
+  const quotes = _getSheetAsObjects(ss.getSheetByName('引用'));
+  const analyses = _getSheetAsObjects(ss.getSheetByName('分析'));
+  const news = _getSheetAsObjects(ss.getSheetByName('ニュース'));
+
+  const allowed = {
+    businessRole: ['調査対象', '直接競合', '間接競合', '代替サービス', '比較対象'],
+    quoteSentiment: ['ポジティブ', 'ネガティブ', 'ニュートラル'],
+    quotePerspective: ['顧客', '価値', '不満', 'アナリスト'],
+    analysisPerspective: ['価値', '仕組み', '顧客', '不満', '直近の動き', '示唆'],
+    sourceType: ['公式サイト', 'レビューサイト', 'ニュース', 'ブログ', 'SNS', 'その他'],
+    newsType: ['プレスリリース', 'ニュース', 'レビュー', 'ブログ', 'SNS', 'その他']
+  };
+
+  function push(level, sheet, row, column, type, detail) {
+    issues.push({ level: level, sheet: sheet, row: row, column: column, type: type, detail: detail });
+  }
+  function notEmpty(v) { return String(v || '').trim() !== ''; }
+  function addDuplicateChecks(rows, sheetName, idColumn) {
+    const seen = {};
+    rows.forEach(function(r, idx) {
+      const id = String(r[idColumn] || '').trim();
+      if (!id) {
+        push('ERROR', sheetName, idx + 2, idColumn, '必須未入力', 'IDが空です');
+        return;
+      }
+      if (seen[id]) push('ERROR', sheetName, idx + 2, idColumn, '重複ID', '同じIDが複数存在します: ' + id);
+      seen[id] = true;
+    });
+    return seen;
+  }
+  function checkEnum(rows, sheetName, column, allowedValues) {
+    rows.forEach(function(r, idx) {
+      const v = String(r[column] || '').trim();
+      if (!v) return;
+      if (allowedValues.indexOf(v) < 0) {
+        push('WARN', sheetName, idx + 2, column, '値の揺れ', '許容外の値です: ' + v);
+      }
+    });
+  }
+
+  const projectIds = addDuplicateChecks(projects, '調査プロジェクト', 'プロジェクトID') || {};
+  const businessIds = addDuplicateChecks(businesses, '事業', '事業ID') || {};
+  const companyIds = addDuplicateChecks(companies, '運営企業', '企業ID') || {};
+  const sourceIds = addDuplicateChecks(sources, 'ソース', 'ソースID') || {};
+  addDuplicateChecks(quotes, '引用', '引用ID');
+  addDuplicateChecks(analyses, '分析', '分析ID');
+  addDuplicateChecks(news, 'ニュース', 'ニュースID');
+
+  businesses.forEach(function(r, idx) {
+    const row = idx + 2;
+    if (notEmpty(r['プロジェクトID']) && !projectIds[String(r['プロジェクトID']).trim()]) push('ERROR', '事業', row, 'プロジェクトID', '参照不整合', '調査プロジェクトに存在しないIDです');
+    if (notEmpty(r['運営企業ID']) && !companyIds[String(r['運営企業ID']).trim()]) push('WARN', '事業', row, '運営企業ID', '参照不整合', '運営企業に存在しないIDです');
+    if (notEmpty(r['ポジションX値']) && isNaN(Number(r['ポジションX値']))) push('WARN', '事業', row, 'ポジションX値', '型不整合', '数値で入力してください');
+    if (notEmpty(r['ポジションY値']) && isNaN(Number(r['ポジションY値']))) push('WARN', '事業', row, 'ポジションY値', '型不整合', '数値で入力してください');
+  });
+
+  sources.forEach(function(r, idx) {
+    const row = idx + 2;
+    if (notEmpty(r['事業ID']) && !businessIds[String(r['事業ID']).trim()]) push('ERROR', 'ソース', row, '事業ID', '参照不整合', '事業に存在しないIDです');
+  });
+  quotes.forEach(function(r, idx) {
+    const row = idx + 2;
+    if (notEmpty(r['事業ID']) && !businessIds[String(r['事業ID']).trim()]) push('ERROR', '引用', row, '事業ID', '参照不整合', '事業に存在しないIDです');
+    if (notEmpty(r['ソースID']) && !sourceIds[String(r['ソースID']).trim()]) push('WARN', '引用', row, 'ソースID', '参照不整合', 'ソースに存在しないIDです');
+  });
+  analyses.forEach(function(r, idx) {
+    const row = idx + 2;
+    if (notEmpty(r['プロジェクトID']) && !projectIds[String(r['プロジェクトID']).trim()]) push('ERROR', '分析', row, 'プロジェクトID', '参照不整合', '調査プロジェクトに存在しないIDです');
+    if (notEmpty(r['事業ID']) && !businessIds[String(r['事業ID']).trim()]) push('ERROR', '分析', row, '事業ID', '参照不整合', '事業に存在しないIDです');
+    const ev = String(r['証跡JSON'] || '').trim();
+    if (ev) {
+      try { JSON.parse(ev); } catch (e) { push('WARN', '分析', row, '証跡JSON', 'JSON不正', '証跡JSONのパースに失敗しました'); }
+    }
+  });
+  news.forEach(function(r, idx) {
+    const row = idx + 2;
+    if (notEmpty(r['事業ID']) && !businessIds[String(r['事業ID']).trim()]) push('ERROR', 'ニュース', row, '事業ID', '参照不整合', '事業に存在しないIDです');
+  });
+
+  checkEnum(businesses, '事業', '事業種別', allowed.businessRole);
+  checkEnum(sources, 'ソース', '種別', allowed.sourceType);
+  checkEnum(quotes, '引用', '感情', allowed.quoteSentiment);
+  checkEnum(quotes, '引用', '観点', allowed.quotePerspective);
+  checkEnum(analyses, '分析', '観点', allowed.analysisPerspective);
+  checkEnum(news, 'ニュース', '種別', allowed.newsType);
+
+  return issues;
 }
 
 function refreshDashboardSheet_() {
@@ -259,9 +413,9 @@ function _buildProjectDetail(ss, projectId) {
       serviceName: b['サービス名'],
       url: b['公式URL'],
       pricing: b['価格帯'] || '',
+      kpi: b['主要KPI'] || '',
       positionX: (posX !== '' && posX !== null && posX !== undefined) ? Number(posX) : null,
       positionY: (posY !== '' && posY !== null && posY !== undefined) ? Number(posY) : null,
-      kpi: b['主要KPI'] || '',
       bmc: {
         valueProposition:      b['BMC_価値提案'] || '',
         customerSegments:      b['BMC_顧客セグメント'] || '',
@@ -344,6 +498,13 @@ function doPost(e) {
     // 1. 調査プロジェクト
     const sheetProj = ss.getSheetByName('調査プロジェクト');
     if (sheetProj) {
+      const existingProjects = _getSheetAsObjects(sheetProj);
+      const alreadyExists = existingProjects.some(function(r) { return r['プロジェクトID'] === projectId; });
+      if (alreadyExists) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ error: 'project_id_already_exists', id: projectId }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
       const targetBiz = (payload.businesses || []).find(function(b) { return b.role === '調査対象'; });
       sheetProj.appendRow([
         projectId,
@@ -400,7 +561,7 @@ function doPost(e) {
           bmc.keyActivities         || '',
           bmc.keyPartners           || '',
           bmc.costStructure         || '',
-          biz.kpi                   || ''
+          biz.kpi || biz.majorKpi || ''
         ]);
       });
     }
