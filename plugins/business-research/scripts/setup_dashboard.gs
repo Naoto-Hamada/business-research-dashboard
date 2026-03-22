@@ -782,7 +782,12 @@ function doPost(e) {
     const ss = _getSpreadsheet();
     const now = new Date();
     const proj = payload.project || {};
-    const projectId = proj.projectId || '';
+    const projectId = String(proj.projectId || '').trim();
+    if (!projectId) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ error: 'project_id_required' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     const payloadBusinesses = _asArray(payload.businesses);
     const payloadSources = _asArray(payload.sources);
     const payloadQuotes = _asArray(payload.quotes);

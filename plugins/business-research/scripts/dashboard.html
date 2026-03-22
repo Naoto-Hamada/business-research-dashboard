@@ -96,16 +96,20 @@
     .fin-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
     @media (max-width: 700px) { .fin-grid { grid-template-columns: 1fr; } }
     .fin-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
-    .fin-card-label { font-size: 10px; font-weight: 700; color: var(--t3); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 8px; }
+    .fin-card-label { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 800; color: #1d4ed8; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .fin-card-label::before { content: ''; width: 11px; height: 11px; border-radius: 999px; border: 2px solid #2563eb; background: #dbeafe; box-shadow: inset 0 0 0 2px #eff6ff; flex-shrink: 0; }
     .fin-card-summary { font-size: 13.5px; font-weight: 600; line-height: 1.4; margin-bottom: 10px; }
     .fin-card-items { list-style: none; padding: 0; margin: 0; font-size: 11.5px; color: var(--t2); }
     .fin-card-items li { padding: 7px 0; border-top: 1px solid var(--border); line-height: 1.55; }
     .fin-card-items li:first-child { border-top: none; }
     .fin-item-main { font-size: 11.5px; color: var(--t2); line-height: 1.55; }
+    .fin-item-key { display: inline-flex; align-items: center; padding: 1px 8px; border-radius: 999px; border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; font-size: 10.5px; font-weight: 800; letter-spacing: 0.01em; margin-right: 6px; vertical-align: 1px; }
+    .fin-item-text { color: var(--t1); font-weight: 500; }
     .fin-item-meta { margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 10.5px; color: var(--t3); }
-    .fin-source-chip { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid #bfdbfe; border-radius: 999px; background: #eff6ff; color: #1d4ed8; text-decoration: none; font-size: 10.5px; line-height: 1.45; }
-    .fin-source-chip:hover { background: #dbeafe; }
-    .fin-assumption { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid #fcd34d; border-radius: 999px; background: #fff7ed; color: #92400e; font-size: 10.5px; line-height: 1.45; }
+    .fin-source-chip { display: inline-flex; align-items: center; gap: 3px; padding: 0; border: none; border-radius: 0; background: transparent; color: #9ca3af; text-decoration: underline; text-decoration-color: #d1d5db; text-underline-offset: 2px; font-size: 10.5px; line-height: 1.45; }
+    .fin-source-chip::before { content: '↗'; font-size: 10px; opacity: 0.7; }
+    .fin-source-chip:hover { color: #6b7280; text-decoration-color: #9ca3af; }
+    .fin-assumption { display: inline-flex; align-items: center; padding: 0; border: none; border-radius: 0; background: transparent; color: #9ca3af; font-size: 10.5px; line-height: 1.45; font-weight: 500; }
 
     /* ── BMC Detail Panel ── */
     .bmc-detail { background: var(--card); border: 1.5px solid var(--accent); border-radius: 10px; padding: 20px 24px; margin-bottom: 8px; }
@@ -691,12 +695,17 @@ function renderFinancialsSection(biz) {
     var items = (data.items || []).map(function(item) {
       var n = normalizeFinItem(item);
       if (!n) return '';
+      var main = String(n.main || '—');
+      var mainMatch = main.match(/^([^:：]{1,20})[：:]\s*(.+)$/);
+      var mainHtml = mainMatch
+        ? '<span class="fin-item-key">' + esc(mainMatch[1]) + '</span><span class="fin-item-text">' + esc(mainMatch[2]) + '</span>'
+        : esc(main);
       var linksHtml = (n.links || []).map(function(v) {
         return '<a href="' + esc(v.url) + '" target="_blank" rel="noopener" class="fin-source-chip">' + esc(v.label || '情報源') + '</a>';
       }).join('');
       var assumptionHtml = n.assumption ? '<span class="fin-assumption">仮定: ' + esc(n.assumption) + '</span>' : '';
       var meta = (linksHtml || assumptionHtml) ? '<div class="fin-item-meta">' + linksHtml + assumptionHtml + '</div>' : '';
-      return '<li><div class="fin-item-main">' + esc(n.main || '—') + '</div>' + meta + '</li>';
+      return '<li><div class="fin-item-main">' + mainHtml + '</div>' + meta + '</li>';
     }).join('');
     return '<div class="fin-card">' +
       '<div class="fin-card-label">' + esc(label) + '</div>' +

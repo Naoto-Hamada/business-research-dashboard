@@ -615,10 +615,15 @@ user-invocable: true
 - 例: `"MAU 3000万 / ARR $2.5億（推定）"`, `"累計導入社数1,200社（公式サイト記載）"`
 
 **Webhook 連携：**
-環境変数 `BUSINESS_RESEARCH_WEBHOOK` が設定されている場合は、JSONに `_secret` を追加してPOST送信してください。
+環境変数 `BUSINESS_RESEARCH_WEBHOOK` が空なら送信を中止してください。  
+POST時は JSON に `_secret` を追加し、レスポンスの `status` と `id` を必ず検証してください。
 
 ```bash
 RESEARCH_JSON='<上記JSONをここに貼り付け>'
+if [ -z "${BUSINESS_RESEARCH_WEBHOOK:-}" ]; then
+  echo "ERROR: BUSINESS_RESEARCH_WEBHOOK is empty"
+  exit 1
+fi
 SIGNED=$(echo "$RESEARCH_JSON" | python3 -c "
 import sys, json, os
 d = json.load(sys.stdin)
@@ -629,6 +634,12 @@ RESP=$(curl -s -X POST "$BUSINESS_RESEARCH_WEBHOOK" \
   -H "Content-Type: application/json" \
   -d "$SIGNED")
 echo "$RESP"
+STATUS=$(echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))")
+PID=$(echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('id',''))")
+if [ "$STATUS" != "success" ] || [ -z "$PID" ]; then
+  echo "ERROR: webhook response invalid (status=$STATUS, id=$PID)"
+  exit 1
+fi
 ```
 
 **送信前チェック（必須）：**
@@ -657,6 +668,7 @@ echo "$RESP"
 
 **POST後の確認（必須）：**
 - 成功レスポンスは `{"status":"success","id":"<projectId>"}` 形式
+- `status=success` でも `id` が空なら失敗扱いにして再送する
 - `{"error":"project_id_already_exists"}` の場合は `projectId` を変更して再送
 - `{"error":"Unauthorized"}` の場合は `WEBHOOK_SECRET` を確認
 - 失敗時はJSONを修正して再送し、成功レスポンスを確認して終了する
@@ -664,19 +676,23 @@ echo "$RESP"
 **成功時のダッシュボード表示（必須）：**
 - 環境変数 `BUSINESS_RESEARCH_DASHBOARD_BASE_URL`（WebアプリURL）を設定しておく
   - 例: `https://script.google.com/macros/s/AKfy.../exec`
-- POST成功時はレスポンスの `id` を使って、`$BUSINESS_RESEARCH_DASHBOARD_BASE_URL?projectId=<id>` を生成して案内する
+- `BUSINESS_RESEARCH_DASHBOARD_BASE_URL` が空なら `BUSINESS_RESEARCH_WEBHOOK` を代用する
+- POST成功時はレスポンスの `id` を使って、`<baseUrl>?projectId=<id>` を生成して案内する
 - 調査完了フローでは、URL生成だけで終わらせず必ず自動で開く
 
 ```bash
-PID=$(echo "$RESP" | python3 -c "import sys,json;print(json.load(sys.stdin).get('id',''))")
-if [ -n "$PID" ] && [ -n "$BUSINESS_RESEARCH_DASHBOARD_BASE_URL" ]; then
-  DASH_URL="${BUSINESS_RESEARCH_DASHBOARD_BASE_URL}?projectId=${PID}"
-  echo "Dashboard: $DASH_URL"
-  if command -v open >/dev/null 2>&1; then
-    open "$DASH_URL"
-  elif command -v xdg-open >/dev/null 2>&1; then
-    xdg-open "$DASH_URL"
-  fi
+BASE_URL="${BUSINESS_RESEARCH_DASHBOARD_BASE_URL:-$BUSINESS_RESEARCH_WEBHOOK}"
+if [ -z "$BASE_URL" ]; then
+  echo "ERROR: dashboard base url is empty"
+  exit 1
+fi
+
+DASH_URL="${BASE_URL}?projectId=${PID}"
+echo "Dashboard: $DASH_URL"
+if command -v open >/dev/null 2>&1; then
+  open "$DASH_URL" || true
+elif command -v xdg-open >/dev/null 2>&1; then
+  xdg-open "$DASH_URL" || true
 fi
 ```
 

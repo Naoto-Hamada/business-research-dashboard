@@ -106,7 +106,8 @@ bash plugins/business-research/scripts/setup_business_research.sh
 ```
 
 サービス名が決まっている場合でも、曖昧な場合でも実行できます。
-調査完了後は、対象ダッシュボードが自動で開きます。
+調査完了後は、対象ダッシュボードURLが必ず出力されます。  
+`open/xdg-open` が利用できる環境では自動でブラウザが開きます。
 
 ```text
 MyFitnessPalを調査して
