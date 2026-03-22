@@ -2,3 +2,9 @@
 
 # Ignore local research results
 research_results/
+
+# Local secrets / personal settings
+.env
+.env.*
+!.env.example
+*.local

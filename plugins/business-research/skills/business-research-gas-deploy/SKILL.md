@@ -23,7 +23,7 @@ description: Deploy Business Research dashboard changes to the fixed production 
    - `plugins/business-research/scripts/dashboard.html`
    - `plugins/business-research/scripts/setup_dashboard.gs`
 2. Run:
-   - `scripts/deploy_business_research_gas.sh "<deploy message>"`
+   - `plugins/business-research/scripts/deploy_business_research_gas.sh "<deploy message>"`
 3. Report:
    - `clasp push` result
    - created version number
