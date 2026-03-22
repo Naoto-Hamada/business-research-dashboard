@@ -113,7 +113,7 @@ bash plugins/business-research/scripts/setup_business_research.sh
 次のコマンドを実行すると、自動で調査が実行されます。
 
 ```text
-/business-research
+/business-research:business-research
 ```
 
 サービス名が決まっている場合でも、曖昧な場合でも実行できます。
