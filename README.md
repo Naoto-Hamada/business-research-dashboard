@@ -62,12 +62,7 @@ Deep Research 自体は強力ですが、実務で使うと次が課題になり
 - Google アカウント
 - ローカルに `clasp`, `jq`, `curl` が入っていること
 
-## まず迷わないための入口
 
-- 初めて触る: `docs/start_here.md`
-- データ構造を確認したい: `docs/spreadsheet_data_model.md`
-- セットアップ実行: `plugins/business-research/scripts/setup_business_research.sh`
-- 再デプロイのみ実行: `plugins/business-research/scripts/deploy_business_research_gas.sh`
 
 ## 最短セットアップ（1コマンド）
 
