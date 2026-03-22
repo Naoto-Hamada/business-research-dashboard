@@ -99,8 +99,13 @@
     .fin-card-label { font-size: 10px; font-weight: 700; color: var(--t3); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 8px; }
     .fin-card-summary { font-size: 13.5px; font-weight: 600; line-height: 1.4; margin-bottom: 10px; }
     .fin-card-items { list-style: none; padding: 0; margin: 0; font-size: 11.5px; color: var(--t2); }
-    .fin-card-items li { padding: 4px 0; border-top: 1px solid var(--border); line-height: 1.55; }
+    .fin-card-items li { padding: 7px 0; border-top: 1px solid var(--border); line-height: 1.55; }
     .fin-card-items li:first-child { border-top: none; }
+    .fin-item-main { font-size: 11.5px; color: var(--t2); line-height: 1.55; }
+    .fin-item-meta { margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 10.5px; color: var(--t3); }
+    .fin-source-chip { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid #bfdbfe; border-radius: 999px; background: #eff6ff; color: #1d4ed8; text-decoration: none; font-size: 10.5px; line-height: 1.45; }
+    .fin-source-chip:hover { background: #dbeafe; }
+    .fin-assumption { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid #fcd34d; border-radius: 999px; background: #fff7ed; color: #92400e; font-size: 10.5px; line-height: 1.45; }
 
     /* ── BMC Detail Panel ── */
     .bmc-detail { background: var(--card); border: 1.5px solid var(--accent); border-radius: 10px; padding: 20px 24px; margin-bottom: 8px; }
@@ -164,11 +169,15 @@
     .news-snippet { font-size: 12px; color: var(--t2); margin-top: 4px; line-height: 1.5; }
 
     /* ── Comparison table ── */
-    .compare-wrap { overflow-x: auto; border: 1px solid #dde4f0; border-radius: 14px; box-shadow: 0 12px 28px rgba(31, 54, 99, 0.08); background: #fff; }
-    .compare-table { border-collapse: collapse; width: 100%; }
+    .compare-wrap { border: 1px solid #dde4f0; border-radius: 14px; box-shadow: 0 12px 28px rgba(31, 54, 99, 0.08); background: #fff; overflow: auto; max-height: none; flex: 1; min-height: 320px; }
+    .content.compare-content { padding: 18px 24px 14px; height: calc(100vh - 72px); overflow: hidden; display: flex; flex-direction: column; }
+    .compare-table { border-collapse: separate; border-spacing: 0; width: 100%; }
     .compare-table th, .compare-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); font-size: 12.5px; vertical-align: top; line-height: 1.55; }
     .compare-table th:last-child, .compare-table td:last-child { border-right: none; }
     .compare-table tr:last-child td, .compare-table tr:last-child th { border-bottom: none; }
+    .compare-table thead th { position: sticky; top: 0; z-index: 12; box-shadow: 0 1px 0 #dbe5f3; }
+    .compare-table thead .ct-dim { z-index: 16; }
+    .compare-table thead .ct-hdr-biz { z-index: 14; }
     .compare-table .ct-dim { position: sticky; left: 0; background: var(--bg); z-index: 5; min-width: 120px; max-width: 120px; width: 120px; font-size: 11px; font-weight: 600; color: var(--t2); }
     .compare-table .ct-biz { min-width: 200px; max-width: 240px; background: var(--card); }
     .compare-table .ct-hdr-dim { background: var(--bg); font-size: 10px; font-weight: 700; color: var(--t3); letter-spacing: 0.07em; text-transform: uppercase; }
@@ -224,6 +233,17 @@
     .modal-close:hover { color: var(--t1); border-color: #d8d8d8; }
     .modal-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
     .modal-body { font-size: 13px; color: var(--t1); line-height: 1.75; white-space: normal; }
+    .bmc-topic-wrap { display: grid; gap: 12px; }
+    .bmc-topic-summary { font-size: 14px; font-weight: 700; color: var(--t1); line-height: 1.7; padding: 10px 12px; border: 1px solid #dfe7f3; border-radius: 10px; background: linear-gradient(180deg, #fbfdff 0%, #f7faff 100%); }
+    .bmc-topic-section { border: 1px solid #d7e3f4; border-left: 4px solid var(--accent); border-radius: 10px; background: #f8fbff; padding: 10px 12px; }
+    .bmc-topic-section-title { font-size: 15px; font-weight: 800; color: var(--t1); letter-spacing: 0.01em; margin-bottom: 8px; }
+    .bmc-topic-cards { display: grid; gap: 10px; }
+    .bmc-topic-card { border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; padding: 10px 12px; box-shadow: 0 4px 10px rgba(16, 24, 40, 0.04); }
+    .bmc-topic-title { font-size: 14px; font-weight: 800; color: var(--t1); line-height: 1.65; }
+    .bmc-topic-detail { font-size: 12.5px; color: var(--t2); line-height: 1.65; margin-top: 4px; }
+    .bmc-topic-sources { font-size: 11px; color: var(--t3); margin-top: 8px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .bmc-source-chip { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid #bfdbfe; border-radius: 999px; background: #eff6ff; color: #1d4ed8; text-decoration: none; font-size: 11px; line-height: 1.5; }
+    .bmc-source-chip:hover { background: #dbeafe; }
     .modal-link { margin-top: 10px; font-size: 12px; }
     .modal-link a { color: var(--accent); text-decoration: none; }
     .modal-quotes { margin-top: 12px; }
@@ -372,6 +392,12 @@ function boot(data) {
   S.detail = data.detail;
   S.mode = 'compare'; S.bizIdx = 0; S.modal = null; S.compareInsightOpen = false;
   buildProjectSel(S.projects);
+  var currentPid = (((S.detail || {}).project || {})['プロジェクトID']) || '';
+  if (currentPid) {
+    var sel = document.getElementById('projectSel');
+    if (sel) sel.value = currentPid;
+    syncProjectQuery(currentPid);
+  }
   buildSidebar(S.detail.businesses || []);
   render();
 }
@@ -380,7 +406,15 @@ function onSelectProject(pid) {
   if (!pid || typeof google === 'undefined') return;
   setMainHtml('<div class="center"><div class="spinner"></div></div>');
   google.script.run
-    .withSuccessHandler(function(d) { if (d) { S.detail = d; S.mode = 'compare'; S.bizIdx = 0; S.modal = null; S.compareInsightOpen = false; buildSidebar(d.businesses || []); render(); } })
+    .withSuccessHandler(function(d) {
+      if (d) {
+        S.detail = d; S.mode = 'compare'; S.bizIdx = 0; S.modal = null; S.compareInsightOpen = false;
+        buildSidebar(d.businesses || []);
+        var currentPid = (((d || {}).project || {})['プロジェクトID']) || pid;
+        syncProjectQuery(currentPid);
+        render();
+      }
+    })
     .withFailureHandler(function(e) { showMsg('error', e.message); })
     .getResearchData(pid);
 }
@@ -390,6 +424,13 @@ function buildProjectSel(projects) {
   var sel = document.getElementById('projectSel');
   sel.innerHTML = !projects.length ? '<option>プロジェクトなし</option>'
     : projects.map(function(p) { return '<option value="' + esc(p.id) + '">' + esc(p.name) + ' · ' + esc(p.date) + '</option>'; }).join('');
+}
+
+function syncProjectQuery(projectId) {
+  if (!projectId || typeof window === 'undefined' || !window.history || !window.location) return;
+  var next = window.location.pathname + '?projectId=' + encodeURIComponent(projectId);
+  if (window.location.hash) next += window.location.hash;
+  try { window.history.replaceState(null, '', next); } catch(e) {}
 }
 
 function buildSidebar(businesses) {
@@ -485,47 +526,86 @@ function renderCompareView(businesses, project, cross) {
   var rows = [
     { label: '売上（推定）', info: 'KPI', tone: 'ct-tone-blue', fn: function(b) {
       var fin = b.financials;
-      var kpi = b.kpi ? '<div style="color:var(--green);font-weight:600">' + esc(trunc(b.kpi, 60)) + '</div>' : '';
-      var revSim = (fin && fin.revenue) ? '<div style="color:var(--green);margin-top:3px">シミュ: ' + esc(trunc(fin.revenue.summary, 50)) + '</div>' : '';
-      if (!kpi && !revSim) return '<span class="ct-empty">—</span>';
-      return kpi + revSim;
+      if (!fin || !fin.revenue) return '<span class="ct-empty">—</span>';
+      var html = '<div style="color:var(--green);font-weight:600">' + expandableCell('売上（推定）', fin.revenue.summary || '') + '</div>';
+      (fin.revenue.items || []).slice(0, 2).forEach(function(item) {
+        html += '<div style="font-size:10.5px;color:var(--t2);margin-top:2px">· ' + expandableCell('売上明細', item) + '</div>';
+      });
+      return html;
     }},
     { label: 'コスト・利益（推定）', info: '利益構造', tone: 'ct-tone-blue', fn: function(b) {
       var fin = b.financials;
       if (!fin) {
         var cost = (b.bmc || {}).costStructure || '';
-        return cost ? esc(trunc(cost, 70)) : '<span class="ct-empty">—</span>';
+        return cost ? expandableCell('コスト構造', cost) : '<span class="ct-empty">—</span>';
       }
       var parts = [];
-      if (fin.cost) parts.push('<span style="color:var(--amber)">コスト: ' + esc(trunc(fin.cost.summary, 45)) + '</span>');
-      if (fin.profit) parts.push('<span style="color:var(--accent)">利益: ' + esc(trunc(fin.profit.summary, 45)) + '</span>');
+      if (fin.cost) parts.push('<span style="color:var(--amber)">コスト: ' + expandableCell('コスト（推定）', fin.cost.summary || '') + '</span>');
+      if (fin.profit) parts.push('<span style="color:var(--accent)">利益: ' + expandableCell('利益（推定）', fin.profit.summary || '') + '</span>');
       return parts.length ? parts.join('<br>') : '<span class="ct-empty">—</span>';
     }},
     { label: '顧客層', info: '顧客セグメント', tone: 'ct-tone-green', fn: function(b) {
       var customer = findA(b.analyses, '顧客');
       var text = customer ? customer.conclusion : (b.bmc || {}).customerSegments || '';
-      return text ? esc(trunc(text, 80)) : '<span class="ct-empty">—</span>';
+      return expandableCell('顧客層', text);
     }},
     { label: '選ばれる理由', info: '価値提案', tone: 'ct-tone-green', fn: function(b) {
       var value = findA(b.analyses, '価値');
       var text = value ? value.conclusion : (b.bmc || {}).valueProposition || '';
-      return text ? esc(trunc(text, 80)) : '<span class="ct-empty">—</span>';
+      return expandableCell('選ばれる理由', text);
     }},
     { label: '収益モデル', info: 'ビジネスモデルキャンバス', tone: 'ct-tone-green', fn: function(b) {
       var r = (b.bmc || {}).revenueStreams || b.pricing || '';
-      return r ? esc(trunc(r, 80)) : '<span class="ct-empty">—</span>';
+      return expandableCell('収益モデル', r);
     }},
-    { label: '強み', tone: 'ct-tone-neutral', fn: function(b) {
+    { label: '実績', tone: 'ct-tone-neutral', fn: function(b) {
+      var ach = b.achievements;
+      if (ach && ach.summary) {
+        var html = '<div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:4px">' + expandableCell('実績', ach.summary) + '</div>';
+        (ach.items || []).slice(0, 3).forEach(function(item) {
+          html += '<div style="font-size:11px;color:var(--t2);margin-top:2px">· ' + expandableCell('実績明細', item) + '</div>';
+        });
+        return html;
+      }
+      return b.kpi ? '<span style="font-size:12px;font-weight:500;color:var(--green)">' + expandableCell('KPI', b.kpi) + '</span>' : '<span class="ct-empty">—</span>';
+    }},
+    { label: '強み（レビュー）', tone: 'ct-tone-neutral', fn: function(b) {
       var a = findA(b.analyses, '価値');
-      return a ? '<span style="color:var(--green)">' + esc(trunc(a.conclusion, 80)) + '</span>' : '<span class="ct-empty">—</span>';
+      var posQ = (b.quotes || []).filter(function(q) {
+        var s = q.sentiment || q['感情'] || '';
+        var p = q.perspective || q['観点'] || '';
+        return s === 'ポジティブ' && p !== 'アナリスト';
+      }).slice(0, 2);
+      var html = '';
+      if (a) html += '<div style="color:var(--green);font-weight:600;font-size:11.5px;margin-bottom:5px">' + expandableCell('強み分析', a.conclusion) + '</div>';
+      posQ.forEach(function(q) {
+        var text = q.text || q['引用テキスト'] || '';
+        var srcUrl = q.sourceUrl || '';
+        html += '<div style="font-size:11px;color:var(--t2);margin-top:4px;padding:3px 7px;border-left:2px solid var(--green);background:var(--green-bg)">"' + expandableCell('レビュー（強み）', text) + '"';
+        if (srcUrl) html += ' <a href="' + esc(srcUrl) + '" target="_blank" rel="noopener" style="font-size:10px;color:var(--accent)">元記事</a>';
+        html += '</div>';
+      });
+      return html || '<span class="ct-empty">—</span>';
     }},
-    { label: '不満・弱み', tone: 'ct-tone-caution', fn: function(b) {
+    { label: '不満・弱み（レビュー）', tone: 'ct-tone-caution', fn: function(b) {
       var diss = findA(b.analyses, '不満');
-      return diss ? '<span style="color:var(--red)">' + esc(trunc(diss.conclusion, 80)) + '</span>' : '<span class="ct-empty">—</span>';
+      var negQ = (b.quotes || []).filter(function(q) {
+        return (q.sentiment || q['感情'] || '') === 'ネガティブ';
+      }).slice(0, 2);
+      var html = '';
+      if (diss) html += '<div style="color:var(--red);font-weight:600;font-size:11.5px;margin-bottom:5px">' + expandableCell('弱み分析', diss.conclusion) + '</div>';
+      negQ.forEach(function(q) {
+        var text = q.text || q['引用テキスト'] || '';
+        var srcUrl = q.sourceUrl || '';
+        html += '<div style="font-size:11px;color:var(--t2);margin-top:4px;padding:3px 7px;border-left:2px solid var(--red);background:var(--red-bg)">"' + expandableCell('レビュー（不満）', text) + '"';
+        if (srcUrl) html += ' <a href="' + esc(srcUrl) + '" target="_blank" rel="noopener" style="font-size:10px;color:var(--accent)">元記事</a>';
+        html += '</div>';
+      });
+      return html || '<span class="ct-empty">—</span>';
     }}
   ];
 
-  var html = '<div class="content">';
+  var html = '<div class="content compare-content">';
   html += '<div style="margin-bottom:18px"><span style="font-family:Outfit,sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em">' + esc(project['プロジェクト名'] || '') + ' — 競争環境</span></div>';
   html += '<div style="margin-bottom:16px">' + renderStrategicGuardrailSection(businesses, cross) + '</div>';
 
@@ -569,15 +649,62 @@ function renderFinancialsSection(biz) {
   if (!fin) return '';
   var ev = fin.evidenceLevel || '推定';
   var evClass = ev === '事実' ? 'b-green' : ev === '推定' ? 'b-amber' : 'b-gray';
+  var lookup = _buildBizRefLookup(biz || {});
+
+  function cleanTextAndRefs(text) {
+    var parsed = _extractRefsAndCleanText(text || '');
+    var inl = _extractInlineLink(parsed.text || '');
+    var links = _resolveRefsToLinks(parsed.refs || [], lookup);
+    if (inl.link) links = _mergeLinks(links, [inl.link]);
+    return { text: inl.text || parsed.text || '', links: links };
+  }
+
+  function normalizeFinItem(item) {
+    if (item === null || item === undefined) return null;
+    if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
+      var s = cleanTextAndRefs(String(item));
+      return { main: s.text, links: s.links, assumption: '' };
+    }
+    if (typeof item === 'object') {
+      var mainBase = String(item.main || item.text || item.label || '').trim();
+      var detail = String(item.detail || item.value || item.formula || '').trim();
+      var merged = [mainBase, detail].filter(Boolean).join(' / ');
+      var cleaned = cleanTextAndRefs(merged);
+      var links = cleaned.links || [];
+      var refs = Array.isArray(item.refs) ? item.refs : [];
+      if (refs.length) links = _mergeLinks(links, _resolveRefsToLinks(refs, lookup));
+      if (item.url || item.sourceUrl) {
+        links = _mergeLinks(links, [{ label: item.sourceTitle || item.sourceLabel || trunc(String(item.url || item.sourceUrl), 48), url: item.url || item.sourceUrl }]);
+      }
+      return {
+        main: cleaned.text || merged || '—',
+        links: links,
+        assumption: String(item.assumption || item.basis || item.note || '').trim()
+      };
+    }
+    return null;
+  }
 
   function finCard(data, label, colorStyle) {
     if (!data) return '';
+    var summaryParsed = cleanTextAndRefs(data.summary || '—');
     var items = (data.items || []).map(function(item) {
-      return '<li>' + esc(item) + '</li>';
+      var n = normalizeFinItem(item);
+      if (!n) return '';
+      var linksHtml = (n.links || []).map(function(v) {
+        return '<a href="' + esc(v.url) + '" target="_blank" rel="noopener" class="fin-source-chip">' + esc(v.label || '情報源') + '</a>';
+      }).join('');
+      var assumptionHtml = n.assumption ? '<span class="fin-assumption">仮定: ' + esc(n.assumption) + '</span>' : '';
+      var meta = (linksHtml || assumptionHtml) ? '<div class="fin-item-meta">' + linksHtml + assumptionHtml + '</div>' : '';
+      return '<li><div class="fin-item-main">' + esc(n.main || '—') + '</div>' + meta + '</li>';
     }).join('');
     return '<div class="fin-card">' +
       '<div class="fin-card-label">' + esc(label) + '</div>' +
-      '<div class="fin-card-summary" style="' + colorStyle + '">' + esc(data.summary || '—') + '</div>' +
+      '<div class="fin-card-summary" style="' + colorStyle + '">' + esc(summaryParsed.text || '—') + '</div>' +
+      (summaryParsed.links && summaryParsed.links.length ? '<div class="fin-item-meta" style="margin-top:-2px;margin-bottom:6px">' + summaryParsed.links.map(function(v) {
+        return '<a href="' + esc(v.url) + '" target="_blank" rel="noopener" class="fin-source-chip">' + esc(v.label || '情報源') + '</a>';
+      }).join('') + '</div>' : '') +
+      ((data.assumption || data.basis || data.note) ? '<div class="fin-item-meta" style="margin-top:-2px;margin-bottom:6px"><span class="fin-assumption">仮定: ' + esc(data.assumption || data.basis || data.note) + '</span></div>' : '') +
       (items ? '<ul class="fin-card-items">' + items + '</ul>' : '') +
     '</div>';
   }
@@ -599,8 +726,9 @@ function renderFinancialsSection(biz) {
 function renderIndividualView(biz, project, cross) {
   var html = renderSummaryBoard(biz, project);
   html += '<div class="content">';
-  html += renderBmcVisualSection(biz);
   html += renderFinancialsSection(biz);
+  html += renderBmcVisualSection(biz);
+
   html += '</div>';
   return html;
 }
@@ -609,8 +737,6 @@ function renderSummaryBoard(biz, project) {
   var bmcVP   = (biz.bmc || {}).valueProposition || '';
   var co = biz.company || {};
   var coText = co.name ? co.name + (co.scale ? ' · ' + co.scale : '') : '';
-  var recentSummary = getRecentSummaryText(biz);
-  var externalSummary = getExternalSummaryText(biz);
 
   var html = '<div class="sum-board">';
   html += '<div class="sum-hdr"><div style="flex:1">';
@@ -625,8 +751,8 @@ function renderSummaryBoard(biz, project) {
   html += '</div></div></div>';
   html += '<div class="sum-bullets">';
   html += sumBullet('概要', bmcVP || '');
-  html += sumBullet('直近の動き', recentSummary || 'データなし', actionInfoIcon('openFutureModal()'));
-  html += sumBullet('外部評価', externalSummary || 'データなし', actionInfoIcon('openExternalSummaryModal()'));
+  html += sumActionOnly('直近の動き', 'openFutureModal()');
+  html += sumActionOnly('外部評価', 'openExternalSummaryModal()');
   html += '</div></div>';
   return html;
 }
@@ -634,6 +760,10 @@ function renderSummaryBoard(biz, project) {
 function sumBullet(label, text, actionIconHtml) {
   if (!text) return '';
   return '<div class="sum-bullet"><span class="sum-bullet-label">' + esc(label) + (actionIconHtml ? ' ' + actionIconHtml : '') + '</span><span class="sum-bullet-text">' + esc(trunc(text, 128)) + '</span></div>';
+}
+
+function sumActionOnly(label, onclickCode) {
+  return '<div class="sum-bullet"><span class="sum-bullet-label">' + esc(label) + ' ' + actionInfoIcon(onclickCode) + '</span><span class="sum-bullet-text" style="color:var(--t3)">詳細は info から確認</span></div>';
 }
 
 function actionInfoIcon(onclickCode) {
@@ -944,13 +1074,16 @@ function renderAnalystTab(biz, cross) {
       var source = q['顧客属性'] || q.customerProfile || '';
       var sent = q['感情'] || q.sentiment || '';
       var sentIcon = sent === 'ポジティブ' ? '😊' : sent === 'ネガティブ' ? '😞' : '💬';
-      var srcObj = q['ソースID'] ? null : null; // source URL lookup would need enrichment
+      var srcUrl = q.sourceUrl || '';
       html += '<div class="analyst-item">' +
         '<div class="ana-hdr"><span class="badge b-human">外部評価</span>' +
           (sent ? '<span class="badge b-gray">' + sentIcon + ' ' + esc(sent) + '</span>' : '') +
         '</div>' +
         '<div class="analyst-text">"' + esc(text) + '"</div>' +
-        (source ? '<div class="analyst-source">— ' + esc(source) + '</div>' : '') +
+        '<div class="analyst-source">' +
+          (source ? '— ' + esc(source) : '') +
+          (srcUrl ? (source ? ' · ' : '') + '<a href="' + esc(srcUrl) + '" target="_blank" rel="noopener" style="color:var(--accent);font-size:11px">元記事</a>' : '') +
+        '</div>' +
       '</div>';
     });
   } else {
@@ -997,26 +1130,242 @@ function openBmcModal(key) {
   var biz = getCurrentBiz();
   if (!biz) return;
   var b = biz.bmc || {};
-  var map = {
-    rev: { title: '収益モデル', body: b.revenueStreams || biz.pricing || '' },
-    cost:{ title: 'コスト構造', body: b.costStructure || '' },
-    cs:  { title: '顧客セグメント', body: b.customerSegments || '' },
-    vp:  { title: '提供価値', body: b.valueProposition || '' },
-    ka:  { title: '価値実装（主要活動 / 主要リソース）', body: ((b.keyActivities || '') + '\n' + (b.keyResources || '')).trim() },
-    ch:  { title: '販促チャネル', body: ((b.channels || '') + '\n' + (b.customerRelationships || '')).trim() },
-    kpi: { title: '主要KPI', body: biz.kpi || '' },
-    kp:  { title: '主要パートナー', body: b.keyPartners || '' },
-    kr:  { title: '主要リソース', body: b.keyResources || '' },
-    cr:  { title: '顧客との関係', body: b.customerRelationships || '' }
+  var bd = biz.bmcDetails || {};
+
+  var titles = {
+    vp: '価値提案', cs: '顧客セグメント', ch: 'チャネル', cr: '顧客との関係',
+    rev: '収益の流れ', kr: '主要リソース', ka: '主要活動', kp: '主要パートナー',
+    cost: 'コスト構造', kpi: '主要KPI'
   };
-  var item = map[key];
-  if (!item) return;
+  var detailKeys = {
+    vp: 'valueProposition', cs: 'customerSegments', ch: 'channels',
+    cr: 'customerRelationships', rev: 'revenueStreams', kr: 'keyResources',
+    ka: 'keyActivities', kp: 'keyPartners', cost: 'costStructure'
+  };
+  var fallbacks = {
+    rev: b.revenueStreams || biz.pricing || '', cost: b.costStructure || '',
+    cs: b.customerSegments || '', vp: b.valueProposition || '',
+    ka: ((b.keyActivities || '') + '\n' + (b.keyResources || '')).trim(),
+    ch: ((b.channels || '') + '\n' + (b.customerRelationships || '')).trim(),
+    kpi: biz.kpi || '', kp: b.keyPartners || '',
+    kr: b.keyResources || '', cr: b.customerRelationships || ''
+  };
+
+  var title = titles[key];
+  if (!title) return;
+
+  var detailKey = detailKeys[key];
+  var detail = detailKey ? bd[detailKey] : null;
+  var fallback = fallbacks[key] || '';
+  var bodyHtml = detail ? buildBmcDetailHtml(key, detail, fallback, biz) : null;
+
   openDetailModal({
-    title: item.title,
-    subtitle: (biz.serviceName || biz.businessName || '') + ' · 構造ファクト',
-    body: item.body || '未記入',
+    title: title,
+    subtitle: (biz.serviceName || biz.businessName || '') + ' · BMC詳細',
+    bodyHtml: bodyHtml,
+    body: bodyHtml ? null : (fallback || '未記入'),
     evidence: []
   });
+}
+
+function _buildBizRefLookup(biz) {
+  var sourceById = {};
+  var newsById = {};
+  var quoteById = {};
+
+  (biz.sources || []).forEach(function(s) {
+    var id = String(s['ソースID'] || s.sourceId || '').trim();
+    if (!id) return;
+    sourceById[id] = {
+      label: s['ページタイトル'] || s.title || s['URL'] || s.url || id,
+      url: s['URL'] || s.url || ''
+    };
+  });
+  (biz.news || []).forEach(function(n) {
+    var id = String(n['ニュースID'] || n.newsId || '').trim();
+    if (!id) return;
+    newsById[id] = {
+      label: n['タイトル'] || n.title || id,
+      url: n['URL'] || n.url || ''
+    };
+  });
+  (biz.quotes || []).forEach(function(q) {
+    var id = String(q['引用ID'] || q.quoteId || '').trim();
+    if (!id) return;
+    var sid = String(q['ソースID'] || q.sourceId || '').trim();
+    var fallbackUrl = (sid && sourceById[sid] && sourceById[sid].url) ? sourceById[sid].url : '';
+    quoteById[id] = {
+      label: trunc(q['引用テキスト'] || q.text || id, 48),
+      url: q.sourceUrl || fallbackUrl || ''
+    };
+  });
+
+  return { sourceById: sourceById, newsById: newsById, quoteById: quoteById };
+}
+
+function _extractRefsAndCleanText(text) {
+  var refs = [];
+  var s = String(text || '');
+  var m;
+  var re = /(sourceId|sourceID|sourceid|newsId|newsID|newsid|quoteId|quoteID|quoteid)\s*[:=]\s*([a-zA-Z0-9._:-]+)/g;
+  while ((m = re.exec(s)) !== null) {
+    var k = String(m[1] || '').toLowerCase();
+    if (k === 'sourceid') k = 'sourceId';
+    else if (k === 'newsid') k = 'newsId';
+    else if (k === 'quoteid') k = 'quoteId';
+    refs.push({ type: k, id: m[2] });
+  }
+  s = s.replace(/（?\s*根拠\s*[:：]\s*[^）)]*[）)]?/g, '').trim();
+  return { text: s, refs: refs };
+}
+
+function _extractInlineLink(text) {
+  var s = String(text || '');
+  var label = '';
+  var url = '';
+  var pair = s.match(/[（(]\s*([^|（）()]+?)\s*[|｜]\s*(https?:\/\/[^)）\s]+)\s*[)）]/);
+  if (pair) {
+    label = String(pair[1] || '').trim();
+    url = String(pair[2] || '').trim();
+    s = s.replace(pair[0], '').trim();
+  }
+  if (!url) {
+    var u = s.match(/https?:\/\/[^\s)）]+/);
+    if (u) {
+      url = u[0];
+      s = s.replace(url, '').replace(/[()（）]/g, '').trim();
+    }
+  }
+  return { text: s, link: url ? { label: label || trunc(url, 48), url: url } : null };
+}
+
+function _resolveRefsToLinks(refs, lookup) {
+  var out = [];
+  var seen = {};
+  (refs || []).forEach(function(r) {
+    var id = String((r && r.id) || '').trim();
+    var type = String((r && (r.type || r.kind)) || '').trim();
+    if (!id || !type) return;
+    var key = type + ':' + id;
+    if (seen[key]) return;
+    seen[key] = true;
+
+    var target = null;
+    if (type === 'sourceId') target = lookup.sourceById[id];
+    else if (type === 'newsId') target = lookup.newsById[id];
+    else if (type === 'quoteId') target = lookup.quoteById[id];
+    if (!target || !target.url) return;
+    out.push({ label: target.label || '関連情報源', url: target.url });
+  });
+  return out;
+}
+
+function _mergeLinks(a, b) {
+  var out = [];
+  var seen = {};
+  (a || []).concat(b || []).forEach(function(v) {
+    var url = String((v && v.url) || '').trim();
+    if (!url || seen[url]) return;
+    seen[url] = true;
+    out.push({ label: (v && v.label) || trunc(url, 48), url: url });
+  });
+  return out;
+}
+
+function _normalizeTopicItem(item, lookup) {
+  if (item === null || item === undefined) return null;
+  if (typeof item === 'object' && !Array.isArray(item)) {
+    var topic = String(item.topic || item.title || item.name || '').trim();
+    var detail = String(item.detail || item.description || '').trim();
+    var refs = Array.isArray(item.refs) ? item.refs : [];
+    var links = _resolveRefsToLinks(refs, lookup);
+    if (item.url) links = _mergeLinks(links, [{ label: item.label || trunc(String(item.url), 48), url: item.url }]);
+    if (!topic && detail) topic = detail;
+    if (!topic) return null;
+    return { topic: topic, detail: detail, links: links };
+  }
+
+  var parsed = _extractRefsAndCleanText(String(item));
+  var inline = _extractInlineLink(parsed.text);
+  var links2 = _resolveRefsToLinks(parsed.refs, lookup);
+  if (inline.link) links2 = _mergeLinks(links2, [inline.link]);
+  var txt = String(inline.text || parsed.text || '').trim();
+  if (!txt) return null;
+  return { topic: txt, detail: '', links: links2 };
+}
+
+function _renderTopicCard(topicObj) {
+  var t = topicObj || {};
+  var links = t.links || [];
+  return '<article class="bmc-topic-card">' +
+    '<div class="bmc-topic-title">' + esc(t.topic || '') + '</div>' +
+    (t.detail ? '<div class="bmc-topic-detail">' + esc(t.detail) + '</div>' : '') +
+    '<div class="bmc-topic-sources">関連情報源: ' +
+      (links.length ? links.map(function(v) {
+        return '<a href="' + esc(v.url) + '" target="_blank" rel="noopener" class="bmc-source-chip">' + esc(v.label) + '</a>';
+      }).join('') : 'なし') +
+    '</div>' +
+  '</article>';
+}
+
+function _renderTopicGroup(label, items, lookup) {
+  var normalized = (items || []).map(function(v) { return _normalizeTopicItem(v, lookup); }).filter(Boolean);
+  if (!normalized.length) return '';
+  return '<section class="bmc-topic-section">' +
+    '<div class="bmc-topic-section-title">' + esc(label) + '</div>' +
+    '<div class="bmc-topic-cards">' + normalized.map(function(t) { return _renderTopicCard(t); }).join('') + '</div>' +
+  '</section>';
+}
+
+function _topicListFromStrings(arr, lookup) {
+  return (arr || []).map(function(v) { return _normalizeTopicItem(v, lookup); }).filter(Boolean);
+}
+
+function buildBmcDetailHtml(key, detail, fallback, biz) {
+  var d = detail || {};
+  var lookup = _buildBizRefLookup(biz || {});
+  var html = '<div class="bmc-topic-wrap">';
+  var summary = String(d.summary || fallback || '').trim();
+  if (summary) {
+    html += '<div class="bmc-topic-summary">' + esc(_extractInlineLink(_extractRefsAndCleanText(summary).text).text || summary) + '</div>';
+  }
+
+  if (Array.isArray(d.topics) && d.topics.length) {
+    html += _renderTopicGroup('トピック', d.topics, lookup);
+    return (html + '</div>') || null;
+  }
+
+  if (key === 'vp') {
+    html += _renderTopicGroup('核心的な価値', d.points, lookup);
+    html += _renderTopicGroup('解決する顧客課題', d.painPoints, lookup);
+    html += _renderTopicGroup('競合との差別化', d.differentiators, lookup);
+  } else if (key === 'cs') {
+    html += _renderTopicGroup('主要顧客層', d.primary, lookup);
+    html += _renderTopicGroup('周辺顧客層', d.secondary, lookup);
+    html += _renderTopicGroup('除外している層', d.excluded, lookup);
+  } else if (key === 'ch') {
+    html += _renderTopicGroup('獲得チャネル', d.acquisition, lookup);
+    html += _renderTopicGroup('維持チャネル', d.retention, lookup);
+  } else if (key === 'cr') {
+    html += _renderTopicGroup('関係維持の仕組み', d.mechanisms, lookup);
+  } else if (key === 'rev') {
+    var streams = [];
+    (d.streams || []).forEach(function(s) {
+      if (!s) return;
+      streams.push({
+        topic: String(s.name || '').trim(),
+        detail: [s.pricing ? ('単価: ' + s.pricing) : '', s.model ? ('モデル: ' + s.model) : ''].filter(Boolean).join(' / '),
+        refs: s.refs || []
+      });
+    });
+    html += _renderTopicGroup('収益源', streams, lookup);
+  } else if (key === 'cost') {
+    html += _renderTopicGroup('固定費', d.fixed, lookup);
+    html += _renderTopicGroup('変動費', d.variable, lookup);
+  } else {
+    html += _renderTopicGroup('項目', d.items, lookup);
+  }
+  return (html + '</div>') || null;
 }
 
 function openAnalystModal(mode) {
@@ -1240,11 +1589,15 @@ function roleBadgeHtml(role) {
 function renderQuoteCard(q, sentIcon) {
   var text = q['引用テキスト'] || q.text || '';
   var attr = q['顧客属性'] || q.customerProfile || '';
+  var srcUrl = q.sourceUrl || '';
   return '<div class="quote-card">' +
     '<span class="quote-sent">' + sentIcon + '</span>' +
     '<div class="quote-body">' +
       '<div class="quote-text">"' + esc(text) + '"</div>' +
-      (attr ? '<div class="quote-attr">— ' + esc(attr) + '</div>' : '') +
+      ((attr || srcUrl) ? '<div class="quote-attr">' +
+        (attr ? '— ' + esc(attr) : '') +
+        (srcUrl ? (attr ? ' · ' : '') + '<a href="' + esc(srcUrl) + '" target="_blank" rel="noopener">元記事</a>' : '') +
+      '</div>' : '') +
     '</div>' +
   '</div>';
 }
@@ -1278,6 +1631,23 @@ function trunc(s, n) {
   if (!s) return '';
   s = String(s);
   return s.length > n ? s.slice(0, n) + '…' : s;
+}
+
+function expandableCell(label, text) {
+  if (!text) return '<span class="ct-empty">—</span>';
+  text = String(text);
+  if (text.length <= 150) return esc(text);
+  var titleEnc = encodeURIComponent(label || '');
+  var textEnc = encodeURIComponent(text);
+  return esc(text.slice(0, 150)) + '… <a href="#" onclick="openExpandableModal(\'' + titleEnc + '\',\'' + textEnc + '\');return false;" style="color:var(--accent);font-size:10.5px;white-space:nowrap">全文</a>';
+}
+
+function openExpandableModal(titleEnc, textEnc) {
+  var title = '';
+  var body = '';
+  try { title = decodeURIComponent(titleEnc || ''); } catch(e) { title = String(titleEnc || ''); }
+  try { body = decodeURIComponent(textEnc || ''); } catch(e) { body = String(textEnc || ''); }
+  openDetailModal({ title: title || '全文', body: body || '', evidence: [] });
 }
 
 function toggleEv(id, btn) {

@@ -3,10 +3,22 @@
 
 // ========== 設定 ==========
 
-const SPREADSHEET_ID = '1GzbOoVAd2fKE336jGnbQzPNrDV5iRxtNiUJHoUtaW2g';
+const DEFAULT_SPREADSHEET_ID = '1GzbOoVAd2fKE336jGnbQzPNrDV5iRxtNiUJHoUtaW2g';
 
 function _getSpreadsheet() {
-  return SpreadsheetApp.openById(SPREADSHEET_ID);
+  const props = PropertiesService.getScriptProperties();
+  const sid = String(props.getProperty('SPREADSHEET_ID') || DEFAULT_SPREADSHEET_ID || '').trim();
+  if (sid) return SpreadsheetApp.openById(sid);
+  const active = SpreadsheetApp.getActiveSpreadsheet();
+  if (active) return active;
+  throw new Error('SPREADSHEET_ID が未設定です。configureSpreadsheetId を実行してください。');
+}
+
+function configureSpreadsheetId(spreadsheetId) {
+  var sid = String(spreadsheetId || '').trim();
+  if (!sid) throw new Error('spreadsheetId is required');
+  PropertiesService.getScriptProperties().setProperty('SPREADSHEET_ID', sid);
+  return { status: 'ok', spreadsheetId: sid };
 }
 
 // ========== メニュー ==========
@@ -16,6 +28,7 @@ function onOpen() {
     .createMenu('ビジネスリサーチ')
     .addItem('📥 初期セットアップ（シート作成・スキーマ更新）', 'setupSheets')
     .addItem('🔄 ダッシュボードシートを更新', 'refreshDashboardSheet')
+    .addItem('🧩 BMC詳細列を再計算', 'rebuildBmcDetailColumns')
     .addItem('✅ データ品質チェック', 'validateSheets')
     .addToUi();
 }
@@ -62,7 +75,10 @@ function _setupSheet事業(ss) {
     '事業ID', 'プロジェクトID', '事業名', 'サービス名', '公式URL', '事業種別', '運営企業ID',
     '価格帯', 'ポジションX値', 'ポジションY値',
     'BMC_価値提案', 'BMC_顧客セグメント', 'BMC_チャネル', 'BMC_顧客との関係',
-    'BMC_収益の流れ', 'BMC_主要リソース', 'BMC_主要活動', 'BMC_主要パートナー', 'BMC_コスト構造', '主要KPI'
+    'BMC_収益の流れ', 'BMC_主要リソース', 'BMC_主要活動', 'BMC_主要パートナー', 'BMC_コスト構造', '主要KPI',
+    'BMC詳細_価値提案', 'BMC詳細_顧客セグメント', 'BMC詳細_チャネル', 'BMC詳細_顧客との関係',
+    'BMC詳細_収益の流れ', 'BMC詳細_主要リソース', 'BMC詳細_主要活動', 'BMC詳細_主要パートナー', 'BMC詳細_コスト構造',
+    '財務シミュレーション_JSON', '実績_JSON', 'BMC詳細_JSON'
   ], '#dcfce7');
 }
 
@@ -328,9 +344,11 @@ function _getSheetAsObjects(sheet) {
 
 // ========== Web アプリ（ダッシュボード表示） ==========
 
-function doGet() {
+function doGet(e) {
+  var requestedProjectId = '';
+  try { requestedProjectId = String((e && e.parameter && e.parameter.projectId) || '').trim(); } catch(err) {}
   var initialData = null;
-  try { initialData = getDashboardData(); } catch(e) {}
+  try { initialData = getDashboardData(requestedProjectId); } catch(e) {}
 
   var htmlOut = HtmlService.createHtmlOutputFromFile('dashboard');
   var content = htmlOut.getContent();
@@ -343,7 +361,7 @@ function doGet() {
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
-function getDashboardData() {
+function getDashboardData(projectId) {
   const ss = _getSpreadsheet();
   const projectsData = _getSheetAsObjects(ss.getSheetByName('調査プロジェクト'));
   if (projectsData.length === 0) return null;
@@ -357,7 +375,9 @@ function getDashboardData() {
     };
   });
 
-  const detail = _buildProjectDetail(ss, sorted[0]['プロジェクトID']);
+  const requested = String(projectId || '').trim();
+  const activeId = requested && projects.some(function(p) { return p.id === requested; }) ? requested : sorted[0]['プロジェクトID'];
+  const detail = _buildProjectDetail(ss, activeId);
   return { projects: projects, detail: detail };
 }
 
@@ -383,7 +403,11 @@ function _buildProjectDetail(ss, projectId) {
   const enrichedBusinesses = businesses.map(function(b) {
     const company = companiesData.find(function(c) { return c['企業ID'] === b['運営企業ID']; }) || {};
     const sources = sourcesData.filter(function(s) { return s['事業ID'] === b['事業ID']; });
-    const quotes = quotesData.filter(function(q) { return q['事業ID'] === b['事業ID']; });
+    const sourceMap = {};
+    sources.forEach(function(s) { sourceMap[String(s['ソースID'] || '')] = s['URL'] || ''; });
+    const quotes = quotesData.filter(function(q) { return q['事業ID'] === b['事業ID']; }).map(function(q) {
+      return Object.assign({}, q, { sourceUrl: sourceMap[String(q['ソースID'] || '')] || '' });
+    });
     const news = newsData
       .filter(function(n) { return n['事業ID'] === b['事業ID']; })
       .sort(function(a, x) {
@@ -432,6 +456,32 @@ function _buildProjectDetail(ss, projectId) {
         url: company['企業URL'] || '',
         scale: company['規模感'] || ''
       },
+      financials: (function() {
+        var v = b['財務シミュレーション_JSON'];
+        if (!v) return null;
+        try { return JSON.parse(String(v)); } catch(e) { return null; }
+      })(),
+      achievements: (function() {
+        var v = b['実績_JSON'];
+        if (!v) return null;
+        try { return JSON.parse(String(v)); } catch(e) { return null; }
+      })(),
+      bmcDetails: (function() {
+        var v = b['BMC詳細_JSON'];
+        if (!v) return null;
+        try { return JSON.parse(String(v)); } catch(e) { return null; }
+      })(),
+      bmcDetailNotes: {
+        valueProposition:      b['BMC詳細_価値提案'] || '',
+        customerSegments:      b['BMC詳細_顧客セグメント'] || '',
+        channels:              b['BMC詳細_チャネル'] || '',
+        customerRelationships: b['BMC詳細_顧客との関係'] || '',
+        revenueStreams:        b['BMC詳細_収益の流れ'] || '',
+        keyResources:          b['BMC詳細_主要リソース'] || '',
+        keyActivities:         b['BMC詳細_主要活動'] || '',
+        keyPartners:           b['BMC詳細_主要パートナー'] || '',
+        costStructure:         b['BMC詳細_コスト構造'] || ''
+      },
       news: news,
       sources: sources,
       quotes: quotes,
@@ -460,6 +510,245 @@ function _buildProjectDetail(ss, projectId) {
     businesses: enrichedBusinesses,
     crossAnalyses: crossAnalyses
   };
+}
+
+function _toText(v) {
+  return String(v || '').trim();
+}
+
+function _asArray(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function _dedupeLines(lines) {
+  const out = [];
+  const seen = {};
+  (lines || []).forEach(function(v) {
+    const s = _toText(v);
+    if (!s || seen[s]) return;
+    seen[s] = true;
+    out.push(s);
+  });
+  return out;
+}
+
+function _collectAnalysisEvidence(payload, businessId, perspectives) {
+  const p = payload || {};
+  const wants = perspectives || [];
+  const lines = [];
+  _asArray(p.analyses).forEach(function(a) {
+    if ((a.businessId || '') !== businessId) return;
+    if (wants.length && wants.indexOf(a.perspective || '') < 0) return;
+    _asArray(a.evidence).forEach(function(ev) {
+      const quote = _toText(ev.quote || ev.text);
+      const sourceTitle = _toText(ev.sourceTitle);
+      const sourceUrl = _toText(ev.sourceUrl);
+      const sourceMemo = _dedupeLines([sourceTitle, sourceUrl]).join(' | ');
+      if (quote) {
+        lines.push('"' + quote + '"' + (sourceMemo ? '（' + sourceMemo + '）' : ''));
+      } else if (sourceMemo) {
+        lines.push(sourceMemo);
+      }
+    });
+  });
+  return _dedupeLines(lines);
+}
+
+function _collectSourceLines(payload, businessId) {
+  const p = payload || {};
+  const lines = [];
+  _asArray(p.sources).forEach(function(src) {
+    if ((src.businessId || '') !== businessId) return;
+    const parts = _dedupeLines([
+      _toText(src.title),
+      _toText(src.type),
+      _toText(src.url)
+    ]);
+    if (parts.length) lines.push(parts.join(' | '));
+  });
+  return _dedupeLines(lines);
+}
+
+function _collectNewsLines(payload, businessId) {
+  const p = payload || {};
+  const lines = [];
+  _asArray(p.news).forEach(function(n) {
+    if ((n.businessId || '') !== businessId) return;
+    const parts = _dedupeLines([
+      _toText(n.date),
+      _toText(n.title),
+      _toText(n.type),
+      _toText(n.url)
+    ]);
+    if (parts.length) lines.push(parts.join(' | '));
+  });
+  return _dedupeLines(lines);
+}
+
+function _pushLabeledList(lines, label, items) {
+  const vals = _dedupeLines(items);
+  if (!vals.length) return;
+  lines.push(label);
+  vals.forEach(function(v) { lines.push('- ' + v); });
+}
+
+function _buildBmcDetailCell(rawDetail, fallbackSummary, evidenceLines, sourceLines, newsLines, detailKeys) {
+  const detail = rawDetail || {};
+  const lines = [];
+  const summary = _toText(detail.summary || fallbackSummary);
+  if (summary) lines.push('評価: ' + summary);
+
+  const detailItems = [];
+  function pushDetailItem(item) {
+    if (item === null || item === undefined) return;
+    if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
+      const t = _toText(item);
+      if (t) detailItems.push(t);
+      return;
+    }
+    if (typeof item === 'object') {
+      const packed = _dedupeLines([item.topic, item.detail, item.name, item.pricing, item.model, item.summary]).join(' | ');
+      if (packed) {
+        detailItems.push(packed);
+      } else {
+        const asJson = _toText(JSON.stringify(item));
+        if (asJson && asJson !== '{}') detailItems.push(asJson);
+      }
+    }
+  }
+  (detailKeys || []).forEach(function(k) {
+    const v = detail[k];
+    if (Array.isArray(v)) {
+      v.forEach(pushDetailItem);
+    } else {
+      pushDetailItem(v);
+    }
+  });
+  _pushLabeledList(lines, '評価に使った記述:', detailItems);
+  _pushLabeledList(lines, '分析の根拠記述:', evidenceLines);
+  _pushLabeledList(lines, '関連ソース:', sourceLines);
+  _pushLabeledList(lines, '関連ニュース:', newsLines);
+
+  return lines.join('\n');
+}
+
+function _buildBmcDetailColumns(payload, biz) {
+  const businessId = _toText(biz.businessId);
+  const bmc = biz.bmc || {};
+  const d = biz.bmcDetails || {};
+  const sourceLines = _collectSourceLines(payload, businessId);
+  const newsLines = _collectNewsLines(payload, businessId);
+  const evidenceBy = {
+    vp: _collectAnalysisEvidence(payload, businessId, ['価値']),
+    cs: _collectAnalysisEvidence(payload, businessId, ['顧客', '不満']),
+    ch: _collectAnalysisEvidence(payload, businessId, ['顧客']),
+    cr: _collectAnalysisEvidence(payload, businessId, ['顧客']),
+    rev: _collectAnalysisEvidence(payload, businessId, ['価値', '仕組み']),
+    kr: _collectAnalysisEvidence(payload, businessId, ['仕組み']),
+    ka: _collectAnalysisEvidence(payload, businessId, ['仕組み']),
+    kp: _collectAnalysisEvidence(payload, businessId, ['仕組み']),
+    cost: _collectAnalysisEvidence(payload, businessId, ['不満', '仕組み'])
+  };
+
+  return {
+    valueProposition: _buildBmcDetailCell(d.valueProposition, bmc.valueProposition, evidenceBy.vp, sourceLines, newsLines, ['topics', 'points', 'painPoints', 'differentiators']),
+    customerSegments: _buildBmcDetailCell(d.customerSegments, bmc.customerSegments, evidenceBy.cs, sourceLines, newsLines, ['topics', 'primary', 'secondary', 'excluded']),
+    channels: _buildBmcDetailCell(d.channels, bmc.channels, evidenceBy.ch, sourceLines, newsLines, ['topics', 'acquisition', 'retention', 'items']),
+    customerRelationships: _buildBmcDetailCell(d.customerRelationships, bmc.customerRelationships, evidenceBy.cr, sourceLines, newsLines, ['topics', 'mechanisms', 'items']),
+    revenueStreams: _buildBmcDetailCell(d.revenueStreams, bmc.revenueStreams || biz.pricing || '', evidenceBy.rev, sourceLines, newsLines, ['topics', 'streams', 'items']),
+    keyResources: _buildBmcDetailCell(d.keyResources, bmc.keyResources, evidenceBy.kr, sourceLines, newsLines, ['topics', 'items']),
+    keyActivities: _buildBmcDetailCell(d.keyActivities, bmc.keyActivities, evidenceBy.ka, sourceLines, newsLines, ['topics', 'items']),
+    keyPartners: _buildBmcDetailCell(d.keyPartners, bmc.keyPartners, evidenceBy.kp, sourceLines, newsLines, ['topics', 'items']),
+    costStructure: _buildBmcDetailCell(d.costStructure, bmc.costStructure, evidenceBy.cost, sourceLines, newsLines, ['topics', 'fixed', 'variable', 'items'])
+  };
+}
+
+function rebuildBmcDetailColumns() {
+  const ss = _getSpreadsheet();
+  const bizSheet = ss.getSheetByName('事業');
+  if (!bizSheet) {
+    SpreadsheetApp.getUi().alert('事業シートが見つかりません。先に初期セットアップを実行してください。');
+    return;
+  }
+
+  const businesses = _getSheetAsObjects(bizSheet);
+  if (!businesses.length) {
+    SpreadsheetApp.getUi().alert('事業シートにデータがありません。');
+    return;
+  }
+
+  const sources = _getSheetAsObjects(ss.getSheetByName('ソース'));
+  const analyses = _getSheetAsObjects(ss.getSheetByName('分析'));
+  const news = _getSheetAsObjects(ss.getSheetByName('ニュース'));
+
+  const headers = bizSheet.getRange(1, 1, 1, Math.max(bizSheet.getLastColumn(), 1)).getValues()[0];
+  const detailCols = [
+    'BMC詳細_価値提案', 'BMC詳細_顧客セグメント', 'BMC詳細_チャネル', 'BMC詳細_顧客との関係',
+    'BMC詳細_収益の流れ', 'BMC詳細_主要リソース', 'BMC詳細_主要活動', 'BMC詳細_主要パートナー', 'BMC詳細_コスト構造'
+  ].map(function(name) {
+    const idx = headers.indexOf(name);
+    return idx >= 0 ? idx + 1 : -1;
+  });
+  if (detailCols.some(function(v) { return v < 1; })) {
+    SpreadsheetApp.getUi().alert('BMC詳細列が不足しています。先に初期セットアップを実行してください。');
+    return;
+  }
+
+  const updates = businesses.map(function(b) {
+    var bmcDetails = {};
+    try { bmcDetails = JSON.parse(String(b['BMC詳細_JSON'] || '{}')); } catch(e) {}
+
+    const payload = {
+      sources: sources.filter(function(s) { return (s['事業ID'] || '') === (b['事業ID'] || ''); }).map(function(s) {
+        return { businessId: s['事業ID'], title: s['ページタイトル'], type: s['種別'], url: s['URL'] };
+      }),
+      analyses: analyses.filter(function(a) { return (a['事業ID'] || '') === (b['事業ID'] || ''); }).map(function(a) {
+        var evidence = [];
+        try { evidence = JSON.parse(String(a['証跡JSON'] || '[]')); } catch(e) {}
+        return { businessId: a['事業ID'], perspective: a['観点'], evidence: evidence };
+      }),
+      news: news.filter(function(n) { return (n['事業ID'] || '') === (b['事業ID'] || ''); }).map(function(n) {
+        return { businessId: n['事業ID'], date: n['日付'], title: n['タイトル'], type: n['種別'], url: n['URL'] };
+      })
+    };
+
+    const cols = _buildBmcDetailColumns(payload, {
+      businessId: b['事業ID'] || '',
+      pricing: b['価格帯'] || '',
+      bmc: {
+        valueProposition: b['BMC_価値提案'] || '',
+        customerSegments: b['BMC_顧客セグメント'] || '',
+        channels: b['BMC_チャネル'] || '',
+        customerRelationships: b['BMC_顧客との関係'] || '',
+        revenueStreams: b['BMC_収益の流れ'] || '',
+        keyResources: b['BMC_主要リソース'] || '',
+        keyActivities: b['BMC_主要活動'] || '',
+        keyPartners: b['BMC_主要パートナー'] || '',
+        costStructure: b['BMC_コスト構造'] || ''
+      },
+      bmcDetails: bmcDetails
+    });
+
+    return [
+      cols.valueProposition || '',
+      cols.customerSegments || '',
+      cols.channels || '',
+      cols.customerRelationships || '',
+      cols.revenueStreams || '',
+      cols.keyResources || '',
+      cols.keyActivities || '',
+      cols.keyPartners || '',
+      cols.costStructure || ''
+    ];
+  });
+
+  const startRow = 2;
+  detailCols.forEach(function(col, i) {
+    const colValues = updates.map(function(row) { return [row[i]]; });
+    bizSheet.getRange(startRow, col, colValues.length, 1).setValues(colValues);
+  });
+
+  SpreadsheetApp.getUi().alert('BMC詳細列を再計算しました（' + updates.length + '件）。');
 }
 
 // ========== Webhook（JSON 受信 → シート書き込み） ==========
@@ -494,6 +783,11 @@ function doPost(e) {
     const now = new Date();
     const proj = payload.project || {};
     const projectId = proj.projectId || '';
+    const payloadBusinesses = _asArray(payload.businesses);
+    const payloadSources = _asArray(payload.sources);
+    const payloadQuotes = _asArray(payload.quotes);
+    const payloadAnalyses = _asArray(payload.analyses);
+    const payloadNews = _asArray(payload.news);
 
     // 1. 調査プロジェクト
     const sheetProj = ss.getSheetByName('調査プロジェクト');
@@ -505,7 +799,7 @@ function doPost(e) {
           .createTextOutput(JSON.stringify({ error: 'project_id_already_exists', id: projectId }))
           .setMimeType(ContentService.MimeType.JSON);
       }
-      const targetBiz = (payload.businesses || []).find(function(b) { return b.role === '調査対象'; });
+      const targetBiz = payloadBusinesses.find(function(b) { return b.role === '調査対象'; });
       sheetProj.appendRow([
         projectId,
         proj.projectName || '',
@@ -522,7 +816,7 @@ function doPost(e) {
     const sheetComp = ss.getSheetByName('運営企業');
     const companyIdMap = {};
     if (sheetComp) {
-      (payload.businesses || []).forEach(function(biz, idx) {
+      payloadBusinesses.forEach(function(biz, idx) {
         if (biz.company) {
           const companyId = projectId + '-company-' + idx;
           companyIdMap[biz.businessId] = companyId;
@@ -539,8 +833,9 @@ function doPost(e) {
     // 3. 事業（BMC + ポジション）
     const sheetBiz = ss.getSheetByName('事業');
     if (sheetBiz) {
-      (payload.businesses || []).forEach(function(biz) {
+      payloadBusinesses.forEach(function(biz) {
         var bmc = biz.bmc || {};
+        var bmcDetailCols = _buildBmcDetailColumns(payload, biz);
         sheetBiz.appendRow([
           biz.businessId || '',
           projectId,
@@ -561,7 +856,19 @@ function doPost(e) {
           bmc.keyActivities         || '',
           bmc.keyPartners           || '',
           bmc.costStructure         || '',
-          biz.kpi || biz.majorKpi || ''
+          biz.kpi || biz.majorKpi || '',
+          bmcDetailCols.valueProposition || '',
+          bmcDetailCols.customerSegments || '',
+          bmcDetailCols.channels || '',
+          bmcDetailCols.customerRelationships || '',
+          bmcDetailCols.revenueStreams || '',
+          bmcDetailCols.keyResources || '',
+          bmcDetailCols.keyActivities || '',
+          bmcDetailCols.keyPartners || '',
+          bmcDetailCols.costStructure || '',
+          biz.financials   ? JSON.stringify(biz.financials)   : '',
+          biz.achievements ? JSON.stringify(biz.achievements) : '',
+          biz.bmcDetails   ? JSON.stringify(biz.bmcDetails)   : ''
         ]);
       });
     }
@@ -569,7 +876,7 @@ function doPost(e) {
     // 4. ソース
     const sheetSrc = ss.getSheetByName('ソース');
     if (sheetSrc) {
-      (payload.sources || []).forEach(function(src) {
+      payloadSources.forEach(function(src) {
         sheetSrc.appendRow([
           src.sourceId || '',
           src.businessId || '',
@@ -586,7 +893,7 @@ function doPost(e) {
     // 5. 引用
     const sheetQuote = ss.getSheetByName('引用');
     if (sheetQuote) {
-      (payload.quotes || []).forEach(function(q) {
+      payloadQuotes.forEach(function(q) {
         sheetQuote.appendRow([
           q.quoteId || '',
           q.sourceId || '',
@@ -603,14 +910,14 @@ function doPost(e) {
     // 6. 分析
     const sheetAna = ss.getSheetByName('分析');
     if (sheetAna) {
-      (payload.analyses || []).forEach(function(a) {
+      payloadAnalyses.forEach(function(a) {
         sheetAna.appendRow([
           a.analysisId || '',
           projectId,
           a.businessId || '',
           a.perspective || '',
           a.conclusion || '',
-          JSON.stringify(a.evidence || []),
+          JSON.stringify(Array.isArray(a.evidence) ? a.evidence : []),
           a.confidence || '',
           a.evidenceLevel || ''
         ]);
@@ -620,7 +927,7 @@ function doPost(e) {
     // 7. ニュース
     const sheetNews = ss.getSheetByName('ニュース');
     if (sheetNews) {
-      (payload.news || []).forEach(function(n) {
+      payloadNews.forEach(function(n) {
         sheetNews.appendRow([
           n.newsId || '',
           n.businessId || '',
@@ -641,8 +948,10 @@ function doPost(e) {
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
+    var stack = '';
+    try { stack = String(err && err.stack ? err.stack : ''); } catch(e) {}
     return ContentService
-      .createTextOutput(JSON.stringify({ error: err.toString() }))
+      .createTextOutput(JSON.stringify({ error: err.toString(), stack: stack }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
