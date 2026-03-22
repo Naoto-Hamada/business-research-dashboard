@@ -2,10 +2,10 @@
   "name": "business-research-dashboard",
   "owner": {
     "name": "Naoto Hamada",
-    "email": "kai@tempi.co.jp"
+    "email": "naoto.hamada.nh@gmail.com"
   },
   "metadata": {
-    "description": "AGIラボの plugin 集。business-research は企業調査をAIで自動化し、スプレッドシートとダッシュボードに結果を蓄積するエージェント型 skill です。",
+    "description": "business-research は企業調査をAIで自動化し、スプレッドシートとダッシュボードに結果を蓄積するエージェント型 skill です。",
     "version": "2.0.0"
   },
   "plugins": [
