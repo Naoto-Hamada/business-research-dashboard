@@ -81,7 +81,7 @@ Deep Research 自体は強力ですが、実務で使うと次が課題になり
 - 環境変数設定
 
 ```bash
-bash scripts/setup_business_research.sh
+bash plugins/business-research/scripts/setup_business_research.sh
 ```
 
 ---

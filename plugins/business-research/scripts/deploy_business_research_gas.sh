@@ -5,9 +5,9 @@ SCRIPT_ID="1GvUMaEF5o5hq0nCn_iG0FxJ2q-OpEpukAjEPwS0ysr7BeIYG_Y0OHNov"
 DEPLOYMENT_ID="AKfycbyDivGNXvt1zfljpx1E1Lt-6Vgy-m-0V16Pi47ddCn7B_THcATjnTh90cwanAqLZKgy"
 WORKDIR="/tmp/business-research-gas"
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SRC_HTML="$REPO_ROOT/plugins/business-research/scripts/dashboard.html"
-SRC_GS="$REPO_ROOT/plugins/business-research/scripts/setup_dashboard.gs"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SRC_HTML="$SCRIPT_DIR/dashboard.html"
+SRC_GS="$SCRIPT_DIR/setup_dashboard.gs"
 
 MSG="${1:-UI更新: Business Research Dashboard}"
 

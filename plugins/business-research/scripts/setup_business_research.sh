@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SRC_GS="$REPO_ROOT/plugins/business-research/scripts/setup_dashboard.gs"
-SRC_HTML="$REPO_ROOT/plugins/business-research/scripts/dashboard.html"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SRC_GS="$SCRIPT_DIR/setup_dashboard.gs"
+SRC_HTML="$SCRIPT_DIR/dashboard.html"
 WORKDIR="${WORKDIR:-/tmp/business-research-setup-$RANDOM}"
 PROJECT_TITLE="${PROJECT_TITLE:-Business Research Dashboard}"
 WEBHOOK_SECRET="${WEBHOOK_SECRET:-}"

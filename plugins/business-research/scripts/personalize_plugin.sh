@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MARKET_JSON="$REPO_ROOT/.claude-plugin/marketplace.json"
-PLUGIN_JSON="$REPO_ROOT/plugins/business-research/.claude-plugin/plugin.json"
+PLUGIN_JSON="$PLUGIN_ROOT/.claude-plugin/plugin.json"
 
 need_cmd() {
   command -v "$1" >/dev/null 2>&1 || { echo "[ERROR] command not found: $1"; exit 1; }
@@ -19,7 +21,7 @@ MARKETPLACE_NAME="${MARKETPLACE_NAME:-}"
 if [[ -z "$GITHUB_USER" || -z "$REPO_NAME" || -z "$AUTHOR_NAME" ]]; then
   cat <<USAGE
 Usage:
-  GITHUB_USER=<github_user> REPO_NAME=<repo_name> AUTHOR_NAME=<display_name> [AUTHOR_EMAIL=<email>] [MARKETPLACE_NAME=<name>] bash scripts/personalize_plugin.sh
+  GITHUB_USER=<github_user> REPO_NAME=<repo_name> AUTHOR_NAME=<display_name> [AUTHOR_EMAIL=<email>] [MARKETPLACE_NAME=<name>] bash plugins/business-research/scripts/personalize_plugin.sh
 USAGE
   exit 1
 fi
