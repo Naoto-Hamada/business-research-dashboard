@@ -56,6 +56,15 @@ Deep Research 自体は強力ですが、実務で使うと次が課題になり
 - 調査完了後、対象ダッシュボードを自動で開く
 
 
+## この README の前提
+
+この README は、次の流れで使う人向けです。
+
+1. GitHub からこの repo を clone する
+2. GAS Interpreter2を設定する（setupと今後のダッシュボードカスタマイズのため）
+3. ローカルでセットアップスクリプトを実行する
+4. Claude Code からこのプロジェクトを使って調査を進める
+
 ## 前提条件（必須）
 
 - Claude Code が使えること
@@ -66,14 +75,21 @@ Deep Research 自体は強力ですが、実務で使うと次が課題になり
 
 ## 最短セットアップ（1コマンド）
 
-### Step 1. GAS Interpreter2 を設定
+### Step 1. この repo を clone する
 
-まずここから設定してください。  
+```bash
+git clone https://github.com/Naoto-Hamada/business-research-dashboard.git
+cd business-research-dashboard
+```
+
+### Step 2. GAS Interpreter2 を設定
+
+ここから設定してください。  
 [GAS Interpreter2 の設定ページ](https://chatgpt-lab.com/n/n290db3448512)
 
 ---
 
-### Step 2. セットアップコマンドを実行
+### Step 3. セットアップコマンドを実行
 
 以下コマンドを実行すると、次に記載されているものが自動で完了します。
 
@@ -92,7 +108,7 @@ bash plugins/business-research/scripts/setup_business_research.sh
 - セットアップ中に Web アプリへ secret を登録し、Claude 環境変数も設定します。
 
 ---
-### Step 3. 調査コマンドを実行
+### Step 4. 調査コマンドを実行
 
 次のコマンドを実行すると、自動で調査が実行されます。
 
