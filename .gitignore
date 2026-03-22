@@ -1,5 +1,8 @@
 .DS_Store
 
+# Local Claude runtime links/settings
+.claude/
+
 # Ignore local research results
 research_results/
 

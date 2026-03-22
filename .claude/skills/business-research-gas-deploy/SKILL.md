@@ -1,1 +1,0 @@
-../../../plugins/business-research/skills/business-research-gas-deploy/SKILL.md
